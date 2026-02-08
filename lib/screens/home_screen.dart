@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/history_provider.dart';
 import 'word_study_screen.dart';
+import 'sentence_study_screen.dart';
+import 'quiz_screen.dart';
+import 'history_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -8,6 +13,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _buildDrawer(context),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -19,7 +25,18 @@ class HomeScreen extends StatelessWidget {
         child: SafeArea(
           child: Stack(
             children: [
-              // 설정 버튼
+              // 메뉴 버튼 (왼쪽)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Builder(
+                  builder: (ctx) => IconButton(
+                    onPressed: () => Scaffold.of(ctx).openDrawer(),
+                    icon: const Icon(Icons.menu, color: Colors.white70, size: 28),
+                  ),
+                ),
+              ),
+              // 설정 버튼 (오른쪽)
               Positioned(
                 top: 8,
                 right: 8,
@@ -39,53 +56,60 @@ class HomeScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                  const Text(
-                    '日本語勉強',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    '일본어 학습',
-                    style: TextStyle(fontSize: 20, color: Colors.white70),
-                  ),
-                  const SizedBox(height: 60),
-                  _buildMenuButton(
-                    context,
-                    icon: Icons.text_fields,
-                    title: '1단계: 단어 외우기',
-                    subtitle: '테스트 시작! (20개 랜덤)',
-                    enabled: true,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const WordStudyScreen(),
+                      const Text(
+                        '日本語勉強',
+                        style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildMenuButton(
-                    context,
-                    icon: Icons.article,
-                    title: '2단계: 문장 해석하기',
-                    subtitle: '준비 중...',
-                    enabled: false,
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 16),
-                  _buildMenuButton(
-                    context,
-                    icon: Icons.history,
-                    title: '3단계: 복습하기',
-                    subtitle: '준비 중...',
-                    enabled: false,
-                    onTap: () {},
-                  ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        '일본어 학습',
+                        style: TextStyle(fontSize: 20, color: Colors.white70),
+                      ),
+                      const SizedBox(height: 60),
+                      _buildMenuButton(
+                        context,
+                        icon: Icons.text_fields,
+                        title: '1단계: 단어 외우기',
+                        subtitle: '테스트 시작! (20개 랜덤)',
+                        color: const Color(0xFF667eea),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const WordStudyScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      _buildMenuButton(
+                        context,
+                        icon: Icons.article,
+                        title: '2단계: 문장 해석하기',
+                        subtitle: '테스트 시작! (20개 랜덤)',
+                        color: const Color(0xFF764ba2),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SentenceStudyScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      _buildMenuButton(
+                        context,
+                        icon: Icons.quiz,
+                        title: '3단계: 퀴즈 풀기!',
+                        subtitle: '4지선다 (단어/문장)',
+                        color: const Color(0xFFe96743),
+                        onTap: () => _showQuizTypeDialog(context),
+                      ),
                     ],
                   ),
                 ),
@@ -97,68 +121,288 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  void _showQuizTypeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: const Text(
+          '퀴즈 유형 선택',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.text_fields,
+              label: '단어 퀴즈',
+              description: '일본어 단어 → 한국어 뜻 맞추기',
+              color: const Color(0xFF667eea),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const QuizScreen(quizType: 'word'),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.article,
+              label: '문장 퀴즈',
+              description: '일본어 문장 → 한국어 해석 맞추기',
+              color: const Color(0xFF764ba2),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const QuizScreen(quizType: 'sentence'),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuizTypeOption(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String description,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: color.withValues(alpha: 0.2),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(icon, color: color, size: 32),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                          fontSize: 13, color: Colors.white54),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, color: color, size: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      backgroundColor: const Color(0xFF1a1a2e),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // 프로필 헤더
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                ),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.white24,
+                    child:
+                        Icon(Icons.person, size: 36, color: Colors.white),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    '학습자',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    '일본어 공부 화이팅!',
+                    style: TextStyle(fontSize: 14, color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+            // 학습 통계
+            Consumer<HistoryProvider>(
+              builder: (_, provider, _) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatItem(
+                          '총 학습', '${provider.totalStudySessions}회'),
+                      _buildStatItem(
+                          '단어', '${provider.wordStudyCount}회'),
+                      _buildStatItem(
+                          '문장', '${provider.sentenceStudyCount}회'),
+                      _buildStatItem(
+                          '퀴즈', '${provider.quizCount}회'),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const Divider(color: Colors.white12),
+            // 메뉴 목록
+            ListTile(
+              leading: const Icon(Icons.history, color: Colors.white70),
+              title: const Text('공부한 내역 확인하기',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.replay, color: Colors.white70),
+              title: const Text('공부한 내역 다시 공부하기',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HistoryScreen()),
+                );
+              },
+            ),
+            const Divider(color: Colors.white12),
+            ListTile(
+              leading: const Icon(Icons.settings, color: Colors.white70),
+              title:
+                  const Text('설정', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                );
+              },
+            ),
+            const Spacer(),
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'JapanStudy v1.0',
+                style: TextStyle(color: Colors.white24, fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: Colors.white54),
+        ),
+      ],
+    );
+  }
+
   Widget _buildMenuButton(
     BuildContext context, {
     required IconData icon,
     required String title,
     required String subtitle,
-    required bool enabled,
+    required Color color,
     required VoidCallback onTap,
   }) {
-    return Opacity(
-      opacity: enabled ? 1.0 : 0.5,
-      child: Material(
-        color: Colors.white.withValues(alpha: 0.15),
+    return Material(
+      color: Colors.white.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: enabled ? onTap : null,
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Row(
-              children: [
-                Icon(icon, color: Colors.white, size: 32),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Row(
+            children: [
+              Icon(icon, color: Colors.white, size: 32),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white70,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                if (enabled)
-                  const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 20),
-                if (!enabled)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text(
-                      'SOON',
-                      style: TextStyle(color: Colors.white60, fontSize: 12),
-                    ),
-                  ),
-              ],
-            ),
+              ),
+              const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 20),
+            ],
           ),
         ),
       ),

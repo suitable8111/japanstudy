@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
-import '../models/word.dart';
+import '../models/sentence.dart';
 import '../models/study_record.dart';
-import '../services/word_service.dart';
+import '../services/sentence_service.dart';
 import '../services/tts_service.dart';
 import 'tts_settings_provider.dart';
 
-class WordProvider extends ChangeNotifier {
-  final WordService _wordService = WordService();
+class SentenceProvider extends ChangeNotifier {
+  final SentenceService _sentenceService = SentenceService();
   final TtsService _ttsService = TtsService();
   TtsService get ttsService => _ttsService;
 
@@ -14,38 +14,38 @@ class WordProvider extends ChangeNotifier {
     _ttsService.applySettings(settings);
   }
 
-  List<Word> _studyWords = [];
+  List<Sentence> _studySentences = [];
   int _currentIndex = 0;
   bool _showAnswer = false;
   bool _isLoading = false;
   bool _isCompleted = false;
 
-  List<Word> get studyWords => _studyWords;
+  List<Sentence> get studySentences => _studySentences;
   int get currentIndex => _currentIndex;
   bool get showAnswer => _showAnswer;
   bool get isLoading => _isLoading;
   bool get isCompleted => _isCompleted;
-  Word? get currentWord =>
-      _studyWords.isNotEmpty && _currentIndex < _studyWords.length
-          ? _studyWords[_currentIndex]
+  Sentence? get currentSentence =>
+      _studySentences.isNotEmpty && _currentIndex < _studySentences.length
+          ? _studySentences[_currentIndex]
           : null;
-  int get totalCount => _studyWords.length;
+  int get totalCount => _studySentences.length;
   String get progressText => '${_currentIndex + 1} / $totalCount';
 
   Future<void> startTest() async {
     _isLoading = true;
     notifyListeners();
 
-    await _wordService.loadWords();
-    _studyWords = _wordService.getRandomWords(20);
+    await _sentenceService.loadSentences();
+    _studySentences = _sentenceService.getRandomSentences(20);
     _currentIndex = 0;
     _showAnswer = false;
     _isCompleted = false;
     _isLoading = false;
     notifyListeners();
 
-    if (_studyWords.isNotEmpty) {
-      await _ttsService.speakJapanese(_studyWords[0].reading);
+    if (_studySentences.isNotEmpty) {
+      await _ttsService.speakJapanese(_studySentences[0].japanese);
     }
   }
 
@@ -54,8 +54,8 @@ class WordProvider extends ChangeNotifier {
     _showAnswer = true;
     notifyListeners();
 
-    if (currentWord != null) {
-      await _ttsService.speakJapanese(currentWord!.reading);
+    if (currentSentence != null) {
+      await _ttsService.speakJapanese(currentSentence!.japanese);
     }
   }
 
@@ -63,20 +63,20 @@ class WordProvider extends ChangeNotifier {
     return StudyRecord(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       date: DateTime.now(),
-      type: 'word',
-      totalCount: _studyWords.length,
-      items: _studyWords
-          .map((w) => StudyItem(
-                japanese: w.japanese,
-                reading: w.reading,
-                korean: w.korean,
+      type: 'sentence',
+      totalCount: _studySentences.length,
+      items: _studySentences
+          .map((s) => StudyItem(
+                japanese: s.japanese,
+                reading: s.reading,
+                korean: s.korean,
               ))
           .toList(),
     );
   }
 
-  Future<void> nextWord() async {
-    if (_currentIndex >= _studyWords.length - 1) {
+  Future<void> nextSentence() async {
+    if (_currentIndex >= _studySentences.length - 1) {
       _isCompleted = true;
       notifyListeners();
       return;
@@ -86,26 +86,28 @@ class WordProvider extends ChangeNotifier {
     _showAnswer = false;
     notifyListeners();
 
-    await _ttsService.speakJapanese(_studyWords[_currentIndex].reading);
+    await _ttsService
+        .speakJapanese(_studySentences[_currentIndex].japanese);
   }
 
-  Future<void> previousWord() async {
+  Future<void> previousSentence() async {
     if (_currentIndex <= 0) return;
 
     _currentIndex--;
     _showAnswer = false;
     notifyListeners();
 
-    await _ttsService.speakJapanese(_studyWords[_currentIndex].reading);
+    await _ttsService
+        .speakJapanese(_studySentences[_currentIndex].japanese);
   }
 
   Future<void> replayTts() async {
-    if (currentWord == null) return;
-    await _ttsService.speakJapanese(currentWord!.reading);
+    if (currentSentence == null) return;
+    await _ttsService.speakJapanese(currentSentence!.japanese);
   }
 
   void reset() {
-    _studyWords = [];
+    _studySentences = [];
     _currentIndex = 0;
     _showAnswer = false;
     _isCompleted = false;

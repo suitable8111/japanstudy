@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/word_provider.dart';
+import '../providers/sentence_provider.dart';
 import '../providers/history_provider.dart';
 
-class WordStudyScreen extends StatefulWidget {
-  const WordStudyScreen({super.key});
+class SentenceStudyScreen extends StatefulWidget {
+  const SentenceStudyScreen({super.key});
 
   @override
-  State<WordStudyScreen> createState() => _WordStudyScreenState();
+  State<SentenceStudyScreen> createState() => _SentenceStudyScreenState();
 }
 
-class _WordStudyScreenState extends State<WordStudyScreen> {
+class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
   bool _historySaved = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WordProvider>().startTest();
+      context.read<SentenceProvider>().startTest();
     });
   }
 
@@ -26,14 +26,14 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: const Text('단어 외우기'),
+        title: const Text('문장 해석하기'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
         actions: [
-          Consumer<WordProvider>(
+          Consumer<SentenceProvider>(
             builder: (_, provider, _) {
-              if (provider.isCompleted || provider.studyWords.isEmpty) {
+              if (provider.isCompleted || provider.studySentences.isEmpty) {
                 return const SizedBox.shrink();
               }
               return Center(
@@ -41,7 +41,8 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
                   padding: const EdgeInsets.only(right: 16),
                   child: Text(
                     provider.progressText,
-                    style: const TextStyle(fontSize: 16, color: Colors.white70),
+                    style:
+                        const TextStyle(fontSize: 16, color: Colors.white70),
                   ),
                 ),
               );
@@ -49,7 +50,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
           ),
         ],
       ),
-      body: Consumer<WordProvider>(
+      body: Consumer<SentenceProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading) {
             return const Center(
@@ -61,10 +62,10 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
             return _buildCompletionScreen(context, provider);
           }
 
-          if (provider.currentWord == null) {
+          if (provider.currentSentence == null) {
             return const Center(
               child: Text(
-                '단어를 불러오는 중...',
+                '문장을 불러오는 중...',
                 style: TextStyle(color: Colors.white70),
               ),
             );
@@ -76,23 +77,23 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
     );
   }
 
-  Widget _buildStudyCard(BuildContext context, WordProvider provider) {
-    final word = provider.currentWord!;
+  Widget _buildStudyCard(BuildContext context, SentenceProvider provider) {
+    final sentence = provider.currentSentence!;
 
     return GestureDetector(
       onTap: () {
         if (!provider.showAnswer) {
           provider.revealAnswer();
         } else {
-          provider.nextWord();
+          provider.nextSentence();
         }
       },
       onHorizontalDragEnd: (details) {
         if (details.primaryVelocity != null) {
           if (details.primaryVelocity! < -100) {
-            provider.nextWord();
+            provider.nextSentence();
           } else if (details.primaryVelocity! > 100) {
-            provider.previousWord();
+            provider.previousSentence();
           }
         }
       },
@@ -108,46 +109,63 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
               LinearProgressIndicator(
                 value: (provider.currentIndex + 1) / provider.totalCount,
                 backgroundColor: Colors.white12,
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF667eea)),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(Color(0xFF764ba2)),
                 minHeight: 4,
                 borderRadius: BorderRadius.circular(2),
               ),
               const SizedBox(height: 8),
-              // Word type badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getTypeColor(word.type),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  _getTypeLabel(word.type),
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
+              // Level & category badge
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _getLevelColor(sentence.level),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      sentence.level,
+                      style:
+                          const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      sentence.category,
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 12),
+                    ),
+                  ),
+                ],
               ),
               const Spacer(),
-              // Japanese word
+              // Japanese sentence
               Text(
-                word.japanese,
+                sentence.japanese,
                 style: const TextStyle(
-                  fontSize: 56,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
+                  height: 1.5,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               // Reading (hiragana)
               Text(
-                word.reading,
-                style: const TextStyle(fontSize: 24, color: Colors.white60),
+                sentence.reading,
+                style: const TextStyle(fontSize: 18, color: Colors.white60),
                 textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              // Category
-              Text(
-                word.category,
-                style: const TextStyle(fontSize: 14, color: Colors.white38),
               ),
               const SizedBox(height: 40),
               // Answer section
@@ -163,11 +181,11 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      provider.showAnswer ? word.korean : '',
+                      provider.showAnswer ? sentence.korean : '',
                       style: const TextStyle(
-                        fontSize: 36,
+                        fontSize: 24,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF667eea),
+                        color: Color(0xFF764ba2),
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -177,7 +195,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
               const Spacer(),
               // Hint text
               Text(
-                provider.showAnswer ? '터치하면 다음 단어' : '터치하면 정답 보기',
+                provider.showAnswer ? '터치하면 다음 문장' : '터치하면 해석 보기',
                 style: const TextStyle(fontSize: 14, color: Colors.white30),
               ),
               const SizedBox(height: 16),
@@ -186,8 +204,9 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed:
-                        provider.currentIndex > 0 ? provider.previousWord : null,
+                    onPressed: provider.currentIndex > 0
+                        ? provider.previousSentence
+                        : null,
                     icon: const Icon(Icons.arrow_back_ios),
                     color: Colors.white54,
                     disabledColor: Colors.white12,
@@ -200,7 +219,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
                   ),
                   const SizedBox(width: 24),
                   IconButton(
-                    onPressed: provider.nextWord,
+                    onPressed: provider.nextSentence,
                     icon: const Icon(Icons.arrow_forward_ios),
                     color: Colors.white54,
                   ),
@@ -214,7 +233,8 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
     );
   }
 
-  Widget _buildCompletionScreen(BuildContext context, WordProvider provider) {
+  Widget _buildCompletionScreen(
+      BuildContext context, SentenceProvider provider) {
     if (!_historySaved) {
       _historySaved = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -228,7 +248,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.check_circle, color: Color(0xFF667eea), size: 80),
+            const Icon(Icons.check_circle, color: Color(0xFF764ba2), size: 80),
             const SizedBox(height: 24),
             const Text(
               '학습 완료!',
@@ -240,18 +260,20 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              '${provider.totalCount}개의 단어를 학습했습니다',
+              '${provider.totalCount}개의 문장을 학습했습니다',
               style: const TextStyle(fontSize: 18, color: Colors.white60),
             ),
             const SizedBox(height: 48),
             ElevatedButton.icon(
               onPressed: () => provider.startTest(),
               icon: const Icon(Icons.refresh),
-              label: const Text('다시 테스트하기', style: TextStyle(fontSize: 16)),
+              label:
+                  const Text('다시 테스트하기', style: TextStyle(fontSize: 16)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF667eea),
+                backgroundColor: const Color(0xFF764ba2),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -271,29 +293,20 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
     );
   }
 
-  Color _getTypeColor(String type) {
-    switch (type) {
-      case 'hiragana':
+  Color _getLevelColor(String level) {
+    switch (level) {
+      case 'N5':
+        return Colors.green;
+      case 'N4':
         return Colors.teal;
-      case 'katakana':
+      case 'N3':
         return Colors.orange;
-      case 'kanji':
-        return Colors.redAccent;
+      case 'N2':
+        return Colors.deepOrange;
+      case 'N1':
+        return Colors.red;
       default:
         return Colors.grey;
-    }
-  }
-
-  String _getTypeLabel(String type) {
-    switch (type) {
-      case 'hiragana':
-        return 'ひらがな';
-      case 'katakana':
-        return 'カタカナ';
-      case 'kanji':
-        return '漢字';
-      default:
-        return type;
     }
   }
 }

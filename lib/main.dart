@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/word_provider.dart';
+import 'providers/sentence_provider.dart';
+import 'providers/quiz_provider.dart';
+import 'providers/history_provider.dart';
 import 'providers/tts_settings_provider.dart';
 import 'screens/home_screen.dart';
 
@@ -23,11 +26,26 @@ class JapanStudyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: ttsSettings),
+        ChangeNotifierProvider(create: (_) => HistoryProvider()..loadHistory()),
         ChangeNotifierProxyProvider<TtsSettingsProvider, WordProvider>(
           create: (_) => WordProvider(),
           update: (_, ttsSettings, wordProvider) {
             wordProvider!.updateTtsSettings(ttsSettings);
             return wordProvider;
+          },
+        ),
+        ChangeNotifierProxyProvider<TtsSettingsProvider, SentenceProvider>(
+          create: (_) => SentenceProvider(),
+          update: (_, ttsSettings, sentenceProvider) {
+            sentenceProvider!.updateTtsSettings(ttsSettings);
+            return sentenceProvider;
+          },
+        ),
+        ChangeNotifierProxyProvider<TtsSettingsProvider, QuizProvider>(
+          create: (_) => QuizProvider(),
+          update: (_, ttsSettings, quizProvider) {
+            quizProvider!.updateTtsSettings(ttsSettings);
+            return quizProvider;
           },
         ),
       ],
