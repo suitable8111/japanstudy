@@ -20,5 +20,23 @@ class SentenceService {
     return shuffled.take(count.clamp(0, _allSentences.length)).toList();
   }
 
+  List<Sentence> getRandomSentencesByLevel(String level,
+      {int primaryCount = 16, int otherCount = 4}) {
+    if (_allSentences.isEmpty) return [];
+
+    final random = Random();
+    final primarySentences =
+        _allSentences.where((s) => s.level == level).toList()..shuffle(random);
+    final otherSentences =
+        _allSentences.where((s) => s.level != level).toList()..shuffle(random);
+
+    final result = <Sentence>[
+      ...primarySentences.take(primaryCount.clamp(0, primarySentences.length)),
+      ...otherSentences.take(otherCount.clamp(0, otherSentences.length)),
+    ]..shuffle(random);
+
+    return result;
+  }
+
   int get totalSentenceCount => _allSentences.length;
 }

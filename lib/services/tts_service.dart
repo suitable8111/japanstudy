@@ -16,6 +16,15 @@ class TtsService {
     await _flutterTts.setVolume(1.0);
     await _flutterTts.setSpeechRate(0.45);
     await _flutterTts.setPitch(1.05);
+    await _flutterTts.awaitSpeakCompletion(true);
+    await _flutterTts.setIosAudioCategory(
+      IosTextToSpeechAudioCategory.playback,
+      [
+        IosTextToSpeechAudioCategoryOptions.defaultToSpeaker,
+        IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+      ],
+      IosTextToSpeechAudioMode.defaultMode,
+    );
 
     final voices = await _flutterTts.getVoices;
     if (voices != null) {

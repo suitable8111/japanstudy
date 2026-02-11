@@ -1,24 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/quiz_provider.dart';
 import '../providers/history_provider.dart';
+import '../services/firestore_service.dart';
 
 class QuizScreen extends StatefulWidget {
   final String quizType; // 'word' or 'sentence'
+  final String difficulty; // 'N5', 'N4', 'N3'
 
-  const QuizScreen({super.key, required this.quizType});
+  const QuizScreen({
+    super.key,
+    required this.quizType,
+    required this.difficulty,
+  });
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
+  bool _statsSaved = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<QuizProvider>().startQuiz(widget.quizType);
+      context
+          .read<QuizProvider>()
+          .startQuiz(widget.quizType, difficulty: widget.difficulty);
     });
+  }
+
+  String get _difficultyLabel {
+    switch (widget.difficulty) {
+      case 'N5':
+        return '하';
+      case 'N4':
+        return '중';
+      case 'N3':
+        return '상';
+      default:
+        return '';
+    }
   }
 
   @override
@@ -28,7 +52,7 @@ class _QuizScreenState extends State<QuizScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: Text('$typeLabel 퀴즈'),
+        title: Text('$typeLabel 퀴즈 ($_difficultyLabel)'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -274,13 +298,33 @@ class _QuizScreenState extends State<QuizScreen> {
             ? (provider.correctCount / provider.totalCount * 100).round()
             : 0;
 
-    // 히스토리 저장
+    // 히스토리 저장 + 유저 통계 업데이트
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final historyProvider = context.read<HistoryProvider>();
       final record = provider.buildRecord();
       // 중복 저장 방지: ID 기반 확인
       if (!historyProvider.records.any((r) => r.id == record.id)) {
         historyProvider.addRecord(record);
+      }
+
+      // user_stats 업데이트 (한 번만)
+      if (!_statsSaved) {
+        _statsSaved = true;
+        try {
+          final authProvider = context.read<AuthProvider>();
+          final user = authProvider.user;
+          if (user != null) {
+            FirestoreService().updateUserStats(
+              user.uid,
+              user.displayName ?? '학습자',
+              widget.difficulty,
+              provider.totalCount,
+              provider.correctCount,
+            );
+          }
+        } catch (e) {
+          debugPrint('Failed to update user stats: $e');
+        }
       }
     });
 
@@ -355,7 +399,11 @@ class _QuizScreenState extends State<QuizScreen> {
             ),
             const SizedBox(height: 48),
             ElevatedButton.icon(
-              onPressed: () => provider.startQuiz(widget.quizType),
+              onPressed: () {
+                _statsSaved = false;
+                provider.startQuiz(widget.quizType,
+                    difficulty: widget.difficulty);
+              },
               icon: const Icon(Icons.refresh),
               label:
                   const Text('다시 도전하기', style: TextStyle(fontSize: 16)),

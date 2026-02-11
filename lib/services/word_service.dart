@@ -19,5 +19,23 @@ class WordService {
     return shuffled.take(count.clamp(0, _allWords.length)).toList();
   }
 
+  List<Word> getRandomWordsByLevel(String level,
+      {int primaryCount = 16, int otherCount = 4}) {
+    if (_allWords.isEmpty) return [];
+
+    final random = Random();
+    final primaryWords = _allWords.where((w) => w.level == level).toList()
+      ..shuffle(random);
+    final otherWords = _allWords.where((w) => w.level != level).toList()
+      ..shuffle(random);
+
+    final result = <Word>[
+      ...primaryWords.take(primaryCount.clamp(0, primaryWords.length)),
+      ...otherWords.take(otherCount.clamp(0, otherWords.length)),
+    ]..shuffle(random);
+
+    return result;
+  }
+
   int get totalWordCount => _allWords.length;
 }

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../providers/history_provider.dart';
 import 'word_study_screen.dart';
 import 'sentence_study_screen.dart';
 import 'quiz_screen.dart';
+import 'radio_screen.dart';
 import 'history_screen.dart';
+import 'profile_screen.dart';
+import 'ranking_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -110,6 +114,15 @@ class HomeScreen extends StatelessWidget {
                         color: const Color(0xFFe96743),
                         onTap: () => _showQuizTypeDialog(context),
                       ),
+                      const SizedBox(height: 16),
+                      _buildMenuButton(
+                        context,
+                        icon: Icons.radio,
+                        title: '4단계: 라디오 듣기',
+                        subtitle: '자동 반복 재생 (단어/문장)',
+                        color: const Color(0xFF43a047),
+                        onTap: () => _showRadioTypeDialog(context),
+                      ),
                     ],
                   ),
                 ),
@@ -141,12 +154,7 @@ class HomeScreen extends StatelessWidget {
               color: const Color(0xFF667eea),
               onTap: () {
                 Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const QuizScreen(quizType: 'word'),
-                  ),
-                );
+                _showDifficultyDialog(context, 'word');
               },
             ),
             const SizedBox(height: 12),
@@ -158,10 +166,128 @@ class HomeScreen extends StatelessWidget {
               color: const Color(0xFF764ba2),
               onTap: () {
                 Navigator.pop(ctx);
+                _showDifficultyDialog(context, 'sentence');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDifficultyDialog(BuildContext context, String quizType) {
+    final typeLabel = quizType == 'word' ? '단어' : '문장';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: Text(
+          '$typeLabel 퀴즈 — 난이도 선택',
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.looks_3,
+              label: '상 (N3)',
+              description: '고급 단계 — N3 레벨 80%',
+              color: const Color(0xFFe96743),
+              onTap: () {
+                Navigator.pop(ctx);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const QuizScreen(quizType: 'sentence'),
+                    builder: (_) =>
+                        QuizScreen(quizType: quizType, difficulty: 'N3'),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.looks_two,
+              label: '중 (N4)',
+              description: '중급 단계 — N4 레벨 80%',
+              color: const Color(0xFFf5a623),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        QuizScreen(quizType: quizType, difficulty: 'N4'),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.looks_one,
+              label: '하 (N5)',
+              description: '초급 단계 — N5 레벨 80%',
+              color: const Color(0xFF43a047),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        QuizScreen(quizType: quizType, difficulty: 'N5'),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRadioTypeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: const Text(
+          '라디오 모드 선택',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.text_fields,
+              label: '단어 라디오',
+              description: '단어를 자동으로 반복 재생',
+              color: const Color(0xFF43a047),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const RadioScreen(mode: 'word'),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.article,
+              label: '문장 라디오',
+              description: '문장을 자동으로 반복 재생',
+              color: const Color(0xFF43a047),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const RadioScreen(mode: 'sentence'),
                   ),
                 );
               },
@@ -222,6 +348,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildDrawer(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final user = authProvider.user;
+    final displayName = user?.displayName ?? '학습자';
+    final email = user?.email ?? '';
+
     return Drawer(
       backgroundColor: const Color(0xFF1a1a2e),
       child: SafeArea(
@@ -236,29 +367,35 @@ class HomeScreen extends StatelessWidget {
                   colors: [Color(0xFF667eea), Color(0xFF764ba2)],
                 ),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
                     radius: 32,
                     backgroundColor: Colors.white24,
-                    child:
-                        Icon(Icons.person, size: 36, color: Colors.white),
+                    backgroundImage: user?.photoURL != null
+                        ? NetworkImage(user!.photoURL!)
+                        : null,
+                    child: user?.photoURL == null
+                        ? const Icon(Icons.person, size: 36, color: Colors.white)
+                        : null,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
-                    '학습자',
-                    style: TextStyle(
+                    displayName,
+                    style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    '일본어 공부 화이팅!',
-                    style: TextStyle(fontSize: 14, color: Colors.white70),
-                  ),
+                  if (email.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      email,
+                      style: const TextStyle(fontSize: 14, color: Colors.white70),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -286,6 +423,30 @@ class HomeScreen extends StatelessWidget {
             ),
             const Divider(color: Colors.white12),
             // 메뉴 목록
+            ListTile(
+              leading: const Icon(Icons.person, color: Colors.white70),
+              title: const Text('내 프로필',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.leaderboard, color: Colors.white70),
+              title: const Text('랭킹',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RankingScreen()),
+                );
+              },
+            ),
             ListTile(
               leading: const Icon(Icons.history, color: Colors.white70),
               title: const Text('공부한 내역 확인하기',
@@ -324,6 +485,16 @@ class HomeScreen extends StatelessWidget {
               },
             ),
             const Spacer(),
+            const Divider(color: Colors.white12),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.redAccent),
+              title: const Text('로그아웃',
+                  style: TextStyle(color: Colors.redAccent)),
+              onTap: () {
+                Navigator.pop(context);
+                _showLogoutDialog(context);
+              },
+            ),
             const Padding(
               padding: EdgeInsets.all(16),
               child: Text(
@@ -354,6 +525,34 @@ class HomeScreen extends StatelessWidget {
           style: const TextStyle(fontSize: 12, color: Colors.white54),
         ),
       ],
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: const Text('로그아웃', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          '로그아웃 하시겠습니까?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context.read<AuthProvider>().signOut();
+            },
+            child: const Text('로그아웃',
+                style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
+      ),
     );
   }
 
