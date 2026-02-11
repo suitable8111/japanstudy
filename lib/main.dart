@@ -8,6 +8,7 @@ import 'providers/sentence_provider.dart';
 import 'providers/quiz_provider.dart';
 import 'providers/radio_provider.dart';
 import 'providers/history_provider.dart';
+import 'providers/ranking_provider.dart';
 import 'providers/tts_settings_provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
@@ -36,6 +37,7 @@ class JapanStudyApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: ttsSettings),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
+        ChangeNotifierProvider(create: (_) => RankingProvider()),
         ChangeNotifierProxyProvider<TtsSettingsProvider, WordProvider>(
           create: (_) => WordProvider(),
           update: (_, ttsSettings, wordProvider) {

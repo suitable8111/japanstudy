@@ -34,6 +34,7 @@ class StudyRecord {
   final String type; // 'word', 'sentence', 'quiz_word', 'quiz_sentence'
   final int totalCount;
   final int? correctCount; // 퀴즈용
+  final String? difficulty; // 'N5', 'N4', 'N3' (nullable for legacy records)
   final List<StudyItem> items;
 
   StudyRecord({
@@ -42,8 +43,22 @@ class StudyRecord {
     required this.type,
     required this.totalCount,
     this.correctCount,
+    this.difficulty,
     required this.items,
   });
+
+  String get difficultyLabel {
+    switch (difficulty) {
+      case 'N5':
+        return '하';
+      case 'N4':
+        return '중';
+      case 'N3':
+        return '상';
+      default:
+        return '';
+    }
+  }
 
   String get typeLabel {
     switch (type) {
@@ -73,6 +88,7 @@ class StudyRecord {
         'type': type,
         'totalCount': totalCount,
         if (correctCount != null) 'correctCount': correctCount,
+        if (difficulty != null) 'difficulty': difficulty,
         'items': items.map((e) => e.toJson()).toList(),
       };
 
@@ -82,6 +98,7 @@ class StudyRecord {
         type: json['type'] as String,
         totalCount: json['totalCount'] as int,
         correctCount: json['correctCount'] as int?,
+        difficulty: json['difficulty'] as String?,
         items: (json['items'] as List)
             .map((e) => StudyItem.fromJson(e as Map<String, dynamic>))
             .toList(),

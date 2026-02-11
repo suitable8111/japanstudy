@@ -25,6 +25,7 @@ class FirestoreService {
       'type': record.type,
       'totalCount': record.totalCount,
       if (record.correctCount != null) 'correctCount': record.correctCount,
+      if (record.difficulty != null) 'difficulty': record.difficulty,
       'items': record.items
           .map((e) => {
                 'japanese': e.japanese,
@@ -53,6 +54,7 @@ class FirestoreService {
         type: data['type'] as String,
         totalCount: data['totalCount'] as int,
         correctCount: data['correctCount'] as int?,
+        difficulty: data['difficulty'] as String?,
         items: (data['items'] as List)
             .map((e) => StudyItem(
                   japanese: e['japanese'] as String,
@@ -88,6 +90,82 @@ class FirestoreService {
       batch.delete(doc.reference);
     }
     await batch.commit();
+  }
+
+  // 퀴즈 통계 업데이트 (user_stats)
+  Future<void> updateUserStats(
+    String uid,
+    String displayName,
+    String difficulty,
+    int totalCount,
+    int correctCount,
+  ) async {
+    final docRef = _db.collection('user_stats').doc(uid);
+
+    await _db.runTransaction((transaction) async {
+      final snapshot = await transaction.get(docRef);
+      final data = snapshot.data() ?? {};
+
+      final levelData =
+          Map<String, dynamic>.from(data[difficulty] as Map? ?? {});
+      final prevQuizCount = (levelData['quizCount'] as num?)?.toInt() ?? 0;
+      final prevTotalCorrect = (levelData['totalCorrect'] as num?)?.toInt() ?? 0;
+      final prevTotalQuestions = (levelData['totalQuestions'] as num?)?.toInt() ?? 0;
+      final prevBestRate = (levelData['bestRate'] as num?)?.toDouble() ?? 0.0;
+
+      final currentRate =
+          totalCount > 0 ? (correctCount / totalCount * 100) : 0.0;
+
+      levelData['quizCount'] = prevQuizCount + 1;
+      levelData['totalCorrect'] = prevTotalCorrect + correctCount;
+      levelData['totalQuestions'] = prevTotalQuestions + totalCount;
+      levelData['bestRate'] =
+          currentRate > prevBestRate ? currentRate : prevBestRate;
+
+      transaction.set(
+        docRef,
+        {
+          'uid': uid,
+          'displayName': displayName,
+          'updatedAt': FieldValue.serverTimestamp(),
+          difficulty: levelData,
+        },
+        SetOptions(merge: true),
+      );
+    });
+  }
+
+  // 랭킹 조회
+  Future<List<Map<String, dynamic>>> getRankings(String difficulty) async {
+    final snapshot = await _db.collection('user_stats').get();
+
+    final rankings = <Map<String, dynamic>>[];
+    for (final doc in snapshot.docs) {
+      final data = doc.data();
+      final levelData =
+          Map<String, dynamic>.from(data[difficulty] as Map? ?? {});
+      final quizCount = (levelData['quizCount'] as num?)?.toInt() ?? 0;
+      if (quizCount == 0) continue;
+
+      final bestRate = (levelData['bestRate'] as num?)?.toDouble() ?? 0.0;
+
+      rankings.add({
+        'uid': data['uid'] ?? doc.id,
+        'displayName': data['displayName'] ?? '알 수 없음',
+        'quizCount': quizCount,
+        'bestRate': bestRate,
+      });
+    }
+
+    // 최고 점수 내림차순, 같으면 퀴즈 횟수 내림차순
+    rankings.sort((a, b) {
+      final cmp =
+          (b['bestRate'] as double).compareTo(a['bestRate'] as double);
+      if (cmp != 0) return cmp;
+      return (b['quizCount'] as int).compareTo(a['quizCount'] as int);
+    });
+
+    return rankings.take(10).toList();
   }
 
   // 학습 통계 조회
