@@ -3,16 +3,19 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/quiz_provider.dart';
 import '../providers/history_provider.dart';
+import '../models/study_record.dart';
 import '../services/firestore_service.dart';
 
 class QuizScreen extends StatefulWidget {
   final String quizType; // 'word' or 'sentence'
-  final String difficulty; // 'N5', 'N4', 'N3'
+  final String? difficulty; // 'N5', 'N4', 'N3' — null for 오답 퀴즈
+  final List<StudyItem>? wrongItems; // 오답 재도전용
 
   const QuizScreen({
     super.key,
     required this.quizType,
-    required this.difficulty,
+    this.difficulty,
+    this.wrongItems,
   });
 
   @override
@@ -26,9 +29,15 @@ class _QuizScreenState extends State<QuizScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<QuizProvider>()
-          .startQuiz(widget.quizType, difficulty: widget.difficulty);
+      if (widget.wrongItems != null) {
+        context
+            .read<QuizProvider>()
+            .startQuizFromItems(widget.wrongItems!, widget.quizType);
+      } else {
+        context
+            .read<QuizProvider>()
+            .startQuiz(widget.quizType, difficulty: widget.difficulty);
+      }
     });
   }
 
@@ -41,7 +50,7 @@ class _QuizScreenState extends State<QuizScreen> {
       case 'N3':
         return '상';
       default:
-        return '';
+        return '오답';
     }
   }
 
@@ -307,23 +316,25 @@ class _QuizScreenState extends State<QuizScreen> {
         historyProvider.addRecord(record);
       }
 
-      // user_stats 업데이트 (한 번만)
+      // user_stats 업데이트 (한 번만, 난이도가 있을 때만)
       if (!_statsSaved) {
         _statsSaved = true;
-        try {
-          final authProvider = context.read<AuthProvider>();
-          final user = authProvider.user;
-          if (user != null) {
-            FirestoreService().updateUserStats(
-              user.uid,
-              user.displayName ?? '학습자',
-              widget.difficulty,
-              provider.totalCount,
-              provider.correctCount,
-            );
+        if (widget.difficulty != null) {
+          try {
+            final authProvider = context.read<AuthProvider>();
+            final user = authProvider.user;
+            if (user != null) {
+              FirestoreService().updateUserStats(
+                user.uid,
+                user.displayName ?? '학습자',
+                widget.difficulty!,
+                provider.totalCount,
+                provider.correctCount,
+              );
+            }
+          } catch (e) {
+            debugPrint('Failed to update user stats: $e');
           }
-        } catch (e) {
-          debugPrint('Failed to update user stats: $e');
         }
       }
     });
@@ -417,6 +428,40 @@ class _QuizScreenState extends State<QuizScreen> {
                 ),
               ),
             ),
+            // 오답 다시 풀기 버튼
+            if (provider.questions.any((q) => !q.isCorrect)) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    final wrongItems = provider.questions
+                        .where((q) => !q.isCorrect)
+                        .map((q) => StudyItem(
+                              japanese: q.japanese,
+                              reading: q.reading,
+                              korean: q.correctAnswer,
+                            ))
+                        .toList();
+                    _statsSaved = false;
+                    provider.startQuizFromItems(wrongItems, widget.quizType);
+                  },
+                  icon: const Icon(Icons.assignment_late),
+                  label: Text(
+                    '오답 다시 풀기 (${provider.questions.where((q) => !q.isCorrect).length}문제)',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.orangeAccent,
+                    side: const BorderSide(color: Colors.orangeAccent),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => Navigator.pop(context),

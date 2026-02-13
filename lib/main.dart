@@ -68,7 +68,7 @@ class JapanStudyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: '日本語勉強',
+        title: 'JLPT 일기장',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(

@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import '../models/word.dart';
 import '../models/sentence.dart';
-import '../models/study_record.dart';
+import '../models/study_record.dart' show StudyRecord, StudyItem;
 import '../services/word_service.dart';
 import '../services/sentence_service.dart';
 import '../services/tts_service.dart';
@@ -204,6 +204,67 @@ class QuizProvider extends ChangeNotifier {
         correctAnswer: sentence.korean,
         choices: choices,
       ));
+    }
+  }
+
+  Future<void> startQuizFromItems(List<StudyItem> items, String type) async {
+    _quizType = type;
+    _difficulty = null;
+    _isLoading = true;
+    _isCompleted = false;
+    _currentIndex = 0;
+    _questions = [];
+    notifyListeners();
+
+    final random = Random();
+
+    if (type == 'word') {
+      await _wordService.loadWords();
+      final allWords = _wordService.getRandomWords(1000);
+      final allKoreans = allWords.map((w) => w.korean).toSet().toList();
+
+      for (final item in items) {
+        final wrongAnswers = allKoreans
+            .where((k) => k != item.korean)
+            .toList()
+          ..shuffle(random);
+        final choices = [item.korean, ...wrongAnswers.take(3)];
+        choices.shuffle(random);
+        _questions.add(QuizQuestion(
+          japanese: item.japanese,
+          reading: item.reading,
+          correctAnswer: item.korean,
+          choices: choices,
+        ));
+      }
+    } else {
+      await _sentenceService.loadSentences();
+      final allSentences = _sentenceService.getRandomSentences(1000);
+      final allKoreans = allSentences.map((s) => s.korean).toSet().toList();
+
+      for (final item in items) {
+        final wrongAnswers = allKoreans
+            .where((k) => k != item.korean)
+            .toList()
+          ..shuffle(random);
+        final choices = [item.korean, ...wrongAnswers.take(3)];
+        choices.shuffle(random);
+        _questions.add(QuizQuestion(
+          japanese: item.japanese,
+          reading: item.reading,
+          correctAnswer: item.korean,
+          choices: choices,
+        ));
+      }
+    }
+
+    _questions.shuffle(random);
+    _isLoading = false;
+    notifyListeners();
+
+    if (_questions.isNotEmpty) {
+      await _ttsService.speakJapanese(
+          type == 'word' ? _questions[0].reading : _questions[0].japanese);
     }
   }
 

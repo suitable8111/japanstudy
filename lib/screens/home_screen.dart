@@ -9,6 +9,7 @@ import 'radio_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
 import 'ranking_screen.dart';
+import 'wrong_answer_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -61,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        '日本語勉強',
+                        'JLPT 일기장',
                         style: TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
@@ -436,6 +437,20 @@ class HomeScreen extends StatelessWidget {
               },
             ),
             ListTile(
+              leading:
+                  const Icon(Icons.assignment_late, color: Colors.white70),
+              title: const Text('오답 노트',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const WrongAnswerScreen()),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.leaderboard, color: Colors.white70),
               title: const Text('랭킹',
                   style: TextStyle(color: Colors.white)),
@@ -498,7 +513,7 @@ class HomeScreen extends StatelessWidget {
             const Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                'JapanStudy v1.0',
+                'JLPT 일기장 v1.0',
                 style: TextStyle(color: Colors.white24, fontSize: 12),
               ),
             ),
