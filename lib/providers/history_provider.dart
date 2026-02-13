@@ -71,6 +71,42 @@ class HistoryProvider extends ChangeNotifier {
     return stats;
   }
 
+  /// 전체 퀴즈에서 틀린 StudyItem 목록 (japanese 기준 중복 제거, 최신 결과 우선)
+  List<StudyItem> get wrongAnswerItems {
+    final seen = <String>{};
+    final result = <StudyItem>[];
+    for (final record in _records) {
+      if (!record.type.startsWith('quiz')) continue;
+      for (final item in record.items) {
+        if (item.isCorrect == false && !seen.contains(item.japanese)) {
+          seen.add(item.japanese);
+          result.add(item);
+        }
+      }
+    }
+    return result;
+  }
+
+  /// 퀴즈 유형별 오답 목록 ('word' or 'sentence')
+  List<StudyItem> wrongAnswersByType(String type) {
+    final quizType = 'quiz_$type';
+    final seen = <String>{};
+    final result = <StudyItem>[];
+    for (final record in _records) {
+      if (record.type != quizType) continue;
+      for (final item in record.items) {
+        if (item.isCorrect == false && !seen.contains(item.japanese)) {
+          seen.add(item.japanese);
+          result.add(item);
+        }
+      }
+    }
+    return result;
+  }
+
+  /// 총 고유 오답 수
+  int get wrongAnswerCount => wrongAnswerItems.length;
+
   void setUid(String? uid) {
     if (_uid != uid) {
       _uid = uid;
