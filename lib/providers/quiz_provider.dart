@@ -5,6 +5,7 @@ import '../models/sentence.dart';
 import '../models/study_record.dart' show StudyRecord, StudyItem;
 import '../services/word_service.dart';
 import '../services/sentence_service.dart';
+import '../services/kana_service.dart';
 import '../services/tts_service.dart';
 import 'tts_settings_provider.dart';
 
@@ -31,6 +32,7 @@ class QuizQuestion {
 class QuizProvider extends ChangeNotifier {
   final WordService _wordService = WordService();
   final SentenceService _sentenceService = SentenceService();
+  final KanaService _kanaService = KanaService();
   final TtsService _ttsService = TtsService();
   TtsService get ttsService => _ttsService;
 
@@ -207,6 +209,50 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> startKanaQuiz(String kanaType) async {
+    _quizType = 'kana_$kanaType';
+    _difficulty = null;
+    _isLoading = true;
+    _isCompleted = false;
+    _currentIndex = 0;
+    _questions = [];
+    notifyListeners();
+
+    await _kanaService.loadKana();
+    final allKana = _kanaService.getKanaByType(kanaType);
+    if (allKana.length < 4) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    final random = Random();
+    final selected = List.from(allKana)..shuffle(random);
+    final quizKana = selected.take(20.clamp(0, selected.length)).toList();
+
+    for (final kana in quizKana) {
+      final wrongAnswers = allKana
+          .where((k) => k.korean != kana.korean)
+          .map((k) => k.korean)
+          .toSet()
+          .toList()
+        ..shuffle(random);
+
+      final choices = <String>[kana.korean, ...wrongAnswers.take(3)];
+      choices.shuffle(random);
+
+      _questions.add(QuizQuestion(
+        japanese: kana.japanese,
+        reading: kana.reading,
+        correctAnswer: kana.korean,
+        choices: choices,
+      ));
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> startQuizFromItems(List<StudyItem> items, String type) async {
     _quizType = type;
     _difficulty = null;
@@ -274,13 +320,15 @@ class QuizProvider extends ChangeNotifier {
     currentQuestion!.selectedIndex = choiceIndex;
     notifyListeners();
 
-    // 오답일 때만 TTS 재생
-    if (!currentQuestion!.isCorrect) {
+    // 오답일 때만 TTS 재생 (가나 퀴즈는 TTS 없음)
+    if (!isKanaQuiz && !currentQuestion!.isCorrect) {
       await _ttsService.speakJapanese(_quizType == 'word'
           ? currentQuestion!.reading
           : currentQuestion!.japanese);
     }
   }
+
+  bool get isKanaQuiz => _quizType.startsWith('kana_');
 
   Future<void> nextQuestion() async {
     if (_currentIndex >= _questions.length - 1) {
@@ -292,9 +340,11 @@ class QuizProvider extends ChangeNotifier {
     _currentIndex++;
     notifyListeners();
 
-    await _ttsService.speakJapanese(_quizType == 'word'
-        ? _questions[_currentIndex].reading
-        : _questions[_currentIndex].japanese);
+    if (!isKanaQuiz) {
+      await _ttsService.speakJapanese(_quizType == 'word'
+          ? _questions[_currentIndex].reading
+          : _questions[_currentIndex].japanese);
+    }
   }
 
   StudyRecord buildRecord() {

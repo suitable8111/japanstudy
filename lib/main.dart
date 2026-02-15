@@ -6,6 +6,7 @@ import 'providers/auth_provider.dart';
 import 'providers/word_provider.dart';
 import 'providers/sentence_provider.dart';
 import 'providers/quiz_provider.dart';
+import 'providers/kana_provider.dart';
 import 'providers/radio_provider.dart';
 import 'providers/history_provider.dart';
 import 'providers/ranking_provider.dart';
@@ -50,6 +51,13 @@ class JapanStudyApp extends StatelessWidget {
           update: (_, ttsSettings, sentenceProvider) {
             sentenceProvider!.updateTtsSettings(ttsSettings);
             return sentenceProvider;
+          },
+        ),
+        ChangeNotifierProxyProvider<TtsSettingsProvider, KanaProvider>(
+          create: (_) => KanaProvider(),
+          update: (_, ttsSettings, kanaProvider) {
+            kanaProvider!.updateTtsSettings(ttsSettings);
+            return kanaProvider;
           },
         ),
         ChangeNotifierProxyProvider<TtsSettingsProvider, QuizProvider>(

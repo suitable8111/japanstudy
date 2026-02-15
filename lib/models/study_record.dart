@@ -70,6 +70,14 @@ class StudyRecord {
         return '단어 퀴즈';
       case 'quiz_sentence':
         return '문장 퀴즈';
+      case 'kana_hiragana':
+        return '히라가나 학습';
+      case 'kana_katakana':
+        return '가타카나 학습';
+      case 'quiz_kana_hiragana':
+        return '히라가나 퀴즈';
+      case 'quiz_kana_katakana':
+        return '가타카나 퀴즈';
       default:
         return type;
     }

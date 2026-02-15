@@ -33,6 +33,9 @@ class _QuizScreenState extends State<QuizScreen> {
         context
             .read<QuizProvider>()
             .startQuizFromItems(widget.wrongItems!, widget.quizType);
+      } else if (widget.quizType.startsWith('kana_')) {
+        final kanaType = widget.quizType.replaceFirst('kana_', '');
+        context.read<QuizProvider>().startKanaQuiz(kanaType);
       } else {
         context
             .read<QuizProvider>()
@@ -40,6 +43,8 @@ class _QuizScreenState extends State<QuizScreen> {
       }
     });
   }
+
+  bool get _isKanaQuiz => widget.quizType.startsWith('kana_');
 
   String get _difficultyLabel {
     switch (widget.difficulty) {
@@ -54,14 +59,20 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
+  String get _appBarTitle {
+    if (_isKanaQuiz) {
+      return widget.quizType == 'kana_hiragana' ? '히라가나 퀴즈' : '가타카나 퀴즈';
+    }
+    final typeLabel = widget.quizType == 'word' ? '단어' : '문장';
+    return '$typeLabel 퀴즈 ($_difficultyLabel)';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final typeLabel = widget.quizType == 'word' ? '단어' : '문장';
-
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: Text('$typeLabel 퀴즈 ($_difficultyLabel)'),
+        title: Text(_appBarTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -152,31 +163,34 @@ class _QuizScreenState extends State<QuizScreen> {
           Text(
             question.japanese,
             style: TextStyle(
-              fontSize: widget.quizType == 'word' ? 48 : 28,
+              fontSize: _isKanaQuiz ? 80 : (widget.quizType == 'word' ? 48 : 28),
               fontWeight: FontWeight.bold,
               color: Colors.white,
               height: 1.5,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
-          // Reading
-          Text(
-            question.reading,
-            style: const TextStyle(fontSize: 18, color: Colors.white60),
-            textAlign: TextAlign.center,
-          ),
+          if (!_isKanaQuiz) ...[
+            const SizedBox(height: 8),
+            // Reading (hidden for kana quiz)
+            Text(
+              question.reading,
+              style: const TextStyle(fontSize: 18, color: Colors.white60),
+              textAlign: TextAlign.center,
+            ),
+          ],
           const SizedBox(height: 12),
-          // Replay TTS
-          IconButton(
-            onPressed: () {
-              provider.ttsService.speakJapanese(widget.quizType == 'word'
-                  ? question.reading
-                  : question.japanese);
-            },
-            icon: const Icon(Icons.volume_up, size: 28),
-            color: Colors.white54,
-          ),
+          // Replay TTS (hidden for kana quiz)
+          if (!_isKanaQuiz)
+            IconButton(
+              onPressed: () {
+                provider.ttsService.speakJapanese(widget.quizType == 'word'
+                    ? question.reading
+                    : question.japanese);
+              },
+              icon: const Icon(Icons.volume_up, size: 28),
+              color: Colors.white54,
+            ),
           const Spacer(),
           // 4 choices
           ...List.generate(4, (index) {
@@ -412,8 +426,13 @@ class _QuizScreenState extends State<QuizScreen> {
             ElevatedButton.icon(
               onPressed: () {
                 _statsSaved = false;
-                provider.startQuiz(widget.quizType,
-                    difficulty: widget.difficulty);
+                if (_isKanaQuiz) {
+                  final kanaType = widget.quizType.replaceFirst('kana_', '');
+                  provider.startKanaQuiz(kanaType);
+                } else {
+                  provider.startQuiz(widget.quizType,
+                      difficulty: widget.difficulty);
+                }
               },
               icon: const Icon(Icons.refresh),
               label:

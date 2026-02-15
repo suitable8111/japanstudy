@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../providers/history_provider.dart';
 import 'word_study_screen.dart';
 import 'sentence_study_screen.dart';
+import 'kana_study_screen.dart';
 import 'quiz_screen.dart';
 import 'radio_screen.dart';
 import 'history_screen.dart';
@@ -77,6 +78,15 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 60),
                       _buildMenuButton(
                         context,
+                        icon: Icons.abc,
+                        title: '0단계: 음절 공부하기',
+                        subtitle: '히라가나 / 가타카나 학습',
+                        color: Colors.teal,
+                        onTap: () => _showKanaTypeDialog(context),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildMenuButton(
+                        context,
                         icon: Icons.text_fields,
                         title: '1단계: 단어 외우기',
                         subtitle: '테스트 시작! (20개 랜덤)',
@@ -135,6 +145,59 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  void _showKanaTypeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: const Text(
+          '음절 유형 선택',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.abc,
+              label: '히라가나 (ひらがな)',
+              description: '기본 일본어 음절 46자 + 탁음/반탁음',
+              color: Colors.teal,
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const KanaStudyScreen(kanaType: 'hiragana'),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.abc,
+              label: '가타카나 (カタカナ)',
+              description: '외래어 표기 음절 46자 + 탁음/반탁음',
+              color: Colors.orange,
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const KanaStudyScreen(kanaType: 'katakana'),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showQuizTypeDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -144,9 +207,46 @@ class HomeScreen extends StatelessWidget {
           '퀴즈 유형 선택',
           style: TextStyle(color: Colors.white),
         ),
-        content: Column(
+        content: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.abc,
+              label: '히라가나 퀴즈',
+              description: '히라가나 → 한글 발음 맞추기',
+              color: Colors.teal,
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const QuizScreen(
+                        quizType: 'kana_hiragana'),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.abc,
+              label: '가타카나 퀴즈',
+              description: '가타카나 → 한글 발음 맞추기',
+              color: Colors.orange,
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const QuizScreen(
+                        quizType: 'kana_katakana'),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
             _buildQuizTypeOption(
               ctx,
               icon: Icons.text_fields,
@@ -171,6 +271,7 @@ class HomeScreen extends StatelessWidget {
               },
             ),
           ],
+        ),
         ),
       ),
     );
