@@ -34,6 +34,17 @@ class KanaProvider extends ChangeNotifier {
   int get totalCount => _studyKana.length;
   String get progressText => '${_currentIndex + 1} / $totalCount';
 
+  Future<void> loadKanaData(String type) async {
+    _kanaType = type;
+    _isLoading = true;
+    notifyListeners();
+
+    await _kanaService.loadKana();
+    _studyKana = _kanaService.getKanaByType(type);
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> startStudy(String type) async {
     _kanaType = type;
     _isLoading = true;

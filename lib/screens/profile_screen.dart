@@ -266,12 +266,32 @@ class ProfileScreen extends StatelessWidget {
           children: [
             Expanded(
               child: _buildStatCard(
+                'N1 (최상)',
+                stats['N1']!,
+                const Color(0xFF9c27b0),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildStatCard(
+                'N2 (상상)',
+                stats['N2']!,
+                const Color(0xFF5c6bc0),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildStatCard(
                 'N3 (상)',
                 stats['N3']!,
                 const Color(0xFFe96743),
               ),
             ),
-            const SizedBox(width: 8),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
             Expanded(
               child: _buildStatCard(
                 'N4 (중)',
@@ -287,6 +307,8 @@ class ProfileScreen extends StatelessWidget {
                 const Color(0xFF43a047),
               ),
             ),
+            const SizedBox(width: 8),
+            const Expanded(child: SizedBox()),
           ],
         ),
       ],

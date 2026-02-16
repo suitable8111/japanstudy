@@ -65,17 +65,17 @@ class HomeScreen extends StatelessWidget {
                       const Text(
                         'JLPT 일기장',
                         style: TextStyle(
-                          fontSize: 48,
+                          fontSize: 36,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 4),
                       const Text(
                         '일본어 학습',
-                        style: TextStyle(fontSize: 20, color: Colors.white70),
+                        style: TextStyle(fontSize: 16, color: Colors.white70),
                       ),
-                      const SizedBox(height: 60),
+                      const SizedBox(height: 32),
                       _buildMenuButton(
                         context,
                         icon: Icons.abc,
@@ -287,63 +287,101 @@ class HomeScreen extends StatelessWidget {
           '$typeLabel 퀴즈 — 난이도 선택',
           style: const TextStyle(color: Colors.white),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildQuizTypeOption(
-              ctx,
-              icon: Icons.looks_3,
-              label: '상 (N3)',
-              description: '고급 단계 — N3 레벨 80%',
-              color: const Color(0xFFe96743),
-              onTap: () {
-                Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        QuizScreen(quizType: quizType, difficulty: 'N3'),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            _buildQuizTypeOption(
-              ctx,
-              icon: Icons.looks_two,
-              label: '중 (N4)',
-              description: '중급 단계 — N4 레벨 80%',
-              color: const Color(0xFFf5a623),
-              onTap: () {
-                Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        QuizScreen(quizType: quizType, difficulty: 'N4'),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            _buildQuizTypeOption(
-              ctx,
-              icon: Icons.looks_one,
-              label: '하 (N5)',
-              description: '초급 단계 — N5 레벨 80%',
-              color: const Color(0xFF43a047),
-              onTap: () {
-                Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        QuizScreen(quizType: quizType, difficulty: 'N5'),
-                  ),
-                );
-              },
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_5,
+                label: '최상 (N1)',
+                description: '최상급 단계 — N1 레벨 80%',
+                color: const Color(0xFF9c27b0),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          QuizScreen(quizType: quizType, difficulty: 'N1'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_4,
+                label: '상상 (N2)',
+                description: '상상급 단계 — N2 레벨 80%',
+                color: const Color(0xFF5c6bc0),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          QuizScreen(quizType: quizType, difficulty: 'N2'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_3,
+                label: '상 (N3)',
+                description: '고급 단계 — N3 레벨 80%',
+                color: const Color(0xFFe96743),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          QuizScreen(quizType: quizType, difficulty: 'N3'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_two,
+                label: '중 (N4)',
+                description: '중급 단계 — N4 레벨 80%',
+                color: const Color(0xFFf5a623),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          QuizScreen(quizType: quizType, difficulty: 'N4'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_one,
+                label: '하 (N5)',
+                description: '초급 단계 — N5 레벨 80%',
+                color: const Color(0xFF43a047),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          QuizScreen(quizType: quizType, difficulty: 'N5'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -566,18 +604,6 @@ class HomeScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.history, color: Colors.white70),
               title: const Text('공부한 내역 확인하기',
-                  style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HistoryScreen()),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.replay, color: Colors.white70),
-              title: const Text('공부한 내역 다시 공부하기',
                   style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);

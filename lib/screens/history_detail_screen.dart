@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/study_record.dart';
+import 'word_study_screen.dart';
+import 'sentence_study_screen.dart';
+import 'kana_study_screen.dart';
+import 'quiz_screen.dart';
 
 class HistoryDetailScreen extends StatelessWidget {
   final StudyRecord record;
@@ -91,9 +95,70 @@ class HistoryDetailScreen extends StatelessWidget {
               },
             ),
           ),
+          // 다시 공부하기 버튼
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: () => _navigateToRestudy(context),
+                  icon: const Icon(Icons.replay),
+                  label: const Text('다시 공부하기',
+                      style: TextStyle(fontSize: 17)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _getTypeColor(record.type),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  void _navigateToRestudy(BuildContext context) {
+    Widget? screen;
+    switch (record.type) {
+      case 'word':
+        screen = const WordStudyScreen();
+        break;
+      case 'sentence':
+        screen = const SentenceStudyScreen();
+        break;
+      case 'kana_hiragana':
+        screen = const KanaStudyScreen(kanaType: 'hiragana');
+        break;
+      case 'kana_katakana':
+        screen = const KanaStudyScreen(kanaType: 'katakana');
+        break;
+      case 'quiz_word':
+        screen = QuizScreen(
+            quizType: 'word', difficulty: record.difficulty ?? 'N5');
+        break;
+      case 'quiz_sentence':
+        screen = QuizScreen(
+            quizType: 'sentence', difficulty: record.difficulty ?? 'N5');
+        break;
+      case 'quiz_kana_hiragana':
+        screen = const QuizScreen(quizType: 'kana_hiragana');
+        break;
+      case 'quiz_kana_katakana':
+        screen = const QuizScreen(quizType: 'kana_katakana');
+        break;
+    }
+    if (screen != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => screen!),
+      );
+    }
   }
 
   Widget _buildItemCard(int index, StudyItem item, bool isQuiz) {

@@ -15,6 +15,8 @@ class _RankingScreenState extends State<RankingScreen>
   late TabController _tabController;
 
   static const _tabs = [
+    {'label': '최상 (N1)', 'difficulty': 'N1'},
+    {'label': '상상 (N2)', 'difficulty': 'N2'},
     {'label': '상 (N3)', 'difficulty': 'N3'},
     {'label': '중 (N4)', 'difficulty': 'N4'},
     {'label': '하 (N5)', 'difficulty': 'N5'},
@@ -27,7 +29,7 @@ class _RankingScreenState extends State<RankingScreen>
     _tabController.addListener(_onTabChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RankingProvider>().loadRankings(difficulty: 'N3');
+      context.read<RankingProvider>().loadRankings(difficulty: 'N1');
     });
   }
 
@@ -55,6 +57,7 @@ class _RankingScreenState extends State<RankingScreen>
         foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
           indicatorColor: const Color(0xFFe96743),
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white54,

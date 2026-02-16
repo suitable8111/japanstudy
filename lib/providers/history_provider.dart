@@ -40,7 +40,7 @@ class HistoryProvider extends ChangeNotifier {
   /// key: 'N5'/'N4'/'N3', value: { quizCount, totalCorrect, totalQuestions, avgRate }
   Map<String, Map<String, dynamic>> get quizStatsByDifficulty {
     final stats = <String, Map<String, dynamic>>{};
-    for (final level in ['N5', 'N4', 'N3']) {
+    for (final level in ['N5', 'N4', 'N3', 'N2', 'N1']) {
       stats[level] = {
         'quizCount': 0,
         'totalCorrect': 0,
@@ -61,7 +61,7 @@ class HistoryProvider extends ChangeNotifier {
           (stats[level]!['totalQuestions'] as int) + record.totalCount;
     }
 
-    for (final level in ['N5', 'N4', 'N3']) {
+    for (final level in ['N5', 'N4', 'N3', 'N2', 'N1']) {
       final total = stats[level]!['totalQuestions'] as int;
       final correct = stats[level]!['totalCorrect'] as int;
       stats[level]!['avgRate'] =

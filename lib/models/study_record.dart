@@ -55,6 +55,10 @@ class StudyRecord {
         return '중';
       case 'N3':
         return '상';
+      case 'N2':
+        return '상상';
+      case 'N1':
+        return '최상';
       default:
         return '';
     }
