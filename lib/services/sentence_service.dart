@@ -38,5 +38,24 @@ class SentenceService {
     return result;
   }
 
+  List<Sentence> getRandomSentencesByCategory(
+      String? level, String? category, int count) {
+    if (_allSentences.isEmpty) return [];
+    var filtered = List<Sentence>.from(_allSentences);
+    if (level != null) {
+      filtered = filtered.where((s) => s.level == level).toList();
+    }
+    if (category != null) {
+      filtered = filtered.where((s) => s.category == category).toList();
+    }
+    filtered.shuffle(Random());
+    return filtered.take(count.clamp(0, filtered.length)).toList();
+  }
+
+  List<String> getCategories() {
+    if (_allSentences.isEmpty) return [];
+    return _allSentences.map((s) => s.category).toSet().toList()..sort();
+  }
+
   int get totalSentenceCount => _allSentences.length;
 }

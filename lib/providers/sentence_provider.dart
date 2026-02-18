@@ -32,12 +32,17 @@ class SentenceProvider extends ChangeNotifier {
   int get totalCount => _studySentences.length;
   String get progressText => '${_currentIndex + 1} / $totalCount';
 
-  Future<void> startTest() async {
+  Future<void> startTest({String? level, String? category}) async {
     _isLoading = true;
     notifyListeners();
 
     await _sentenceService.loadSentences();
-    _studySentences = _sentenceService.getRandomSentences(20);
+    if (level != null || category != null) {
+      _studySentences =
+          _sentenceService.getRandomSentencesByCategory(level, category, 20);
+    } else {
+      _studySentences = _sentenceService.getRandomSentences(20);
+    }
     _currentIndex = 0;
     _showAnswer = false;
     _isCompleted = false;

@@ -37,5 +37,16 @@ class WordService {
     return result;
   }
 
+  List<Word> getRandomWordsByLevelOnly(String level, int count) {
+    if (_allWords.isEmpty) return [];
+    final levelWords = _allWords.where((w) => w.level == level).toList()
+      ..shuffle(Random());
+    return levelWords.take(count.clamp(0, levelWords.length)).toList();
+  }
+
+  List<Word> getAllWords() {
+    return List<Word>.from(_allWords);
+  }
+
   int get totalWordCount => _allWords.length;
 }

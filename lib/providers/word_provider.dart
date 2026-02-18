@@ -32,12 +32,16 @@ class WordProvider extends ChangeNotifier {
   int get totalCount => _studyWords.length;
   String get progressText => '${_currentIndex + 1} / $totalCount';
 
-  Future<void> startTest() async {
+  Future<void> startTest({String? level}) async {
     _isLoading = true;
     notifyListeners();
 
     await _wordService.loadWords();
-    _studyWords = _wordService.getRandomWords(20);
+    if (level != null) {
+      _studyWords = _wordService.getRandomWordsByLevelOnly(level, 20);
+    } else {
+      _studyWords = _wordService.getRandomWords(20);
+    }
     _currentIndex = 0;
     _showAnswer = false;
     _isCompleted = false;

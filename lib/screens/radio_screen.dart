@@ -4,8 +4,9 @@ import '../providers/radio_provider.dart';
 
 class RadioScreen extends StatefulWidget {
   final String mode; // 'word' or 'sentence'
+  final String? level;
 
-  const RadioScreen({super.key, required this.mode});
+  const RadioScreen({super.key, required this.mode, this.level});
 
   @override
   State<RadioScreen> createState() => _RadioScreenState();
@@ -16,7 +17,7 @@ class _RadioScreenState extends State<RadioScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RadioProvider>().startRadio(widget.mode);
+      context.read<RadioProvider>().startRadio(widget.mode, level: widget.level);
     });
   }
 
@@ -28,6 +29,7 @@ class _RadioScreenState extends State<RadioScreen> {
   @override
   Widget build(BuildContext context) {
     final modeLabel = widget.mode == 'word' ? '단어' : '문장';
+    final titleSuffix = widget.level != null ? ' (${widget.level})' : '';
 
     return PopScope(
       canPop: true,
@@ -39,7 +41,7 @@ class _RadioScreenState extends State<RadioScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFF1a1a2e),
         appBar: AppBar(
-          title: Text('라디오 듣기 - $modeLabel'),
+          title: Text('라디오 듣기 - $modeLabel$titleSuffix'),
           backgroundColor: Colors.transparent,
           elevation: 0,
           foregroundColor: Colors.white,
@@ -269,7 +271,7 @@ class _RadioScreenState extends State<RadioScreen> {
             ),
             const SizedBox(height: 48),
             ElevatedButton.icon(
-              onPressed: () => provider.startRadio(widget.mode),
+              onPressed: () => provider.startRadio(widget.mode, level: widget.level),
               icon: const Icon(Icons.refresh),
               label: const Text('다시 듣기', style: TextStyle(fontSize: 16)),
               style: ElevatedButton.styleFrom(

@@ -4,7 +4,9 @@ import '../providers/word_provider.dart';
 import '../providers/history_provider.dart';
 
 class WordStudyScreen extends StatefulWidget {
-  const WordStudyScreen({super.key});
+  final String? level;
+
+  const WordStudyScreen({super.key, this.level});
 
   @override
   State<WordStudyScreen> createState() => _WordStudyScreenState();
@@ -17,7 +19,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<WordProvider>().startTest();
+      context.read<WordProvider>().startTest(level: widget.level);
     });
   }
 
@@ -26,7 +28,9 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: const Text('단어 외우기'),
+        title: Text(widget.level != null
+            ? '단어 외우기 (${widget.level})'
+            : '단어 외우기'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -245,7 +249,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
             ),
             const SizedBox(height: 48),
             ElevatedButton.icon(
-              onPressed: () => provider.startTest(),
+              onPressed: () => provider.startTest(level: widget.level),
               icon: const Icon(Icons.refresh),
               label: const Text('다시 테스트하기', style: TextStyle(fontSize: 16)),
               style: ElevatedButton.styleFrom(

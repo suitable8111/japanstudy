@@ -42,15 +42,21 @@ class RadioProvider extends ChangeNotifier {
           ? _items[_currentIndex]
           : null;
 
-  Future<void> startRadio(String mode) async {
+  String? _level;
+  String? get level => _level;
+
+  Future<void> startRadio(String mode, {String? level}) async {
     _mode = mode;
+    _level = level;
     _isLoading = true;
     _stopRequested = false;
     notifyListeners();
 
     if (mode == 'word') {
       await _wordService.loadWords();
-      final words = _wordService.getRandomWords(20);
+      final words = level != null
+          ? _wordService.getRandomWordsByLevelOnly(level, 20)
+          : _wordService.getRandomWords(20);
       _items = words
           .map((w) => {
                 'japanese': w.japanese,
@@ -60,7 +66,9 @@ class RadioProvider extends ChangeNotifier {
           .toList();
     } else {
       await _sentenceService.loadSentences();
-      final sentences = _sentenceService.getRandomSentences(20);
+      final sentences = level != null
+          ? _sentenceService.getRandomSentencesByCategory(level, null, 20)
+          : _sentenceService.getRandomSentences(20);
       _items = sentences
           .map((s) => {
                 'japanese': s.japanese,

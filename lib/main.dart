@@ -11,6 +11,7 @@ import 'providers/radio_provider.dart';
 import 'providers/history_provider.dart';
 import 'providers/ranking_provider.dart';
 import 'providers/tts_settings_provider.dart';
+import 'providers/level_test_provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
 
@@ -72,6 +73,13 @@ class JapanStudyApp extends StatelessWidget {
           update: (_, ttsSettings, radioProvider) {
             radioProvider!.updateTtsSettings(ttsSettings);
             return radioProvider;
+          },
+        ),
+        ChangeNotifierProxyProvider<TtsSettingsProvider, LevelTestProvider>(
+          create: (_) => LevelTestProvider(),
+          update: (_, ttsSettings, levelTestProvider) {
+            levelTestProvider!.updateTtsSettings(ttsSettings);
+            return levelTestProvider;
           },
         ),
       ],

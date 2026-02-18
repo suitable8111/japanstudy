@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/history_provider.dart';
+import '../services/sentence_service.dart';
 import 'word_study_screen.dart';
 import 'sentence_study_screen.dart';
 import 'kana_study_screen.dart';
@@ -12,6 +13,7 @@ import 'profile_screen.dart';
 import 'ranking_screen.dart';
 import 'wrong_answer_screen.dart';
 import 'settings_screen.dart';
+import 'level_test_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -89,32 +91,18 @@ class HomeScreen extends StatelessWidget {
                         context,
                         icon: Icons.text_fields,
                         title: '1단계: 단어 외우기',
-                        subtitle: '테스트 시작! (20개 랜덤)',
+                        subtitle: '레벨별 단어 학습 (20개)',
                         color: const Color(0xFF667eea),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const WordStudyScreen(),
-                            ),
-                          );
-                        },
+                        onTap: () => _showWordLevelDialog(context),
                       ),
                       const SizedBox(height: 16),
                       _buildMenuButton(
                         context,
                         icon: Icons.article,
                         title: '2단계: 문장 해석하기',
-                        subtitle: '테스트 시작! (20개 랜덤)',
+                        subtitle: '레벨/카테고리별 문장 학습 (20개)',
                         color: const Color(0xFF764ba2),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const SentenceStudyScreen(),
-                            ),
-                          );
-                        },
+                        onTap: () => _showSentenceCategoryDialog(context),
                       ),
                       const SizedBox(height: 16),
                       _buildMenuButton(
@@ -196,6 +184,285 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showWordLevelDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: const Text(
+          '단어 레벨 선택',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.shuffle,
+                label: '전체 랜덤',
+                description: '모든 레벨에서 랜덤 20개',
+                color: Colors.blueGrey,
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WordStudyScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_one,
+                label: 'N5 (초급)',
+                description: 'N5 레벨 단어 20개',
+                color: const Color(0xFF43a047),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WordStudyScreen(level: 'N5'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_two,
+                label: 'N4 (중급)',
+                description: 'N4 레벨 단어 20개',
+                color: const Color(0xFFf5a623),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WordStudyScreen(level: 'N4'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_3,
+                label: 'N3 (상급)',
+                description: 'N3 레벨 단어 20개',
+                color: const Color(0xFFe96743),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WordStudyScreen(level: 'N3'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_4,
+                label: 'N2 (상상급)',
+                description: 'N2 레벨 단어 20개',
+                color: const Color(0xFF5c6bc0),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WordStudyScreen(level: 'N2'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_5,
+                label: 'N1 (최상급)',
+                description: 'N1 레벨 단어 20개',
+                color: const Color(0xFF9c27b0),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WordStudyScreen(level: 'N1'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSentenceCategoryDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: const Text(
+          '문장 레벨 선택',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.shuffle,
+                label: '전체 랜덤',
+                description: '모든 레벨/카테고리에서 랜덤 20개',
+                color: Colors.blueGrey,
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const SentenceStudyScreen(),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_one,
+                label: 'N5 (초급)',
+                description: 'N5 레벨 문장 20개',
+                color: const Color(0xFF43a047),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showSentenceSubCategoryDialog(context, 'N5');
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_two,
+                label: 'N4 (중급)',
+                description: 'N4 레벨 문장 20개',
+                color: const Color(0xFFf5a623),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showSentenceSubCategoryDialog(context, 'N4');
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_3,
+                label: 'N3 (상급)',
+                description: 'N3 레벨 문장 20개',
+                color: const Color(0xFFe96743),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showSentenceSubCategoryDialog(context, 'N3');
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_4,
+                label: 'N2 (상상급)',
+                description: 'N2 레벨 문장 20개',
+                color: const Color(0xFF5c6bc0),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showSentenceSubCategoryDialog(context, 'N2');
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_5,
+                label: 'N1 (최상급)',
+                description: 'N1 레벨 문장 20개',
+                color: const Color(0xFF9c27b0),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showSentenceSubCategoryDialog(context, 'N1');
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSentenceSubCategoryDialog(BuildContext context, String level) {
+    final sentenceService = SentenceService();
+    sentenceService.loadSentences().then((_) {
+      final categories = sentenceService.getCategories();
+      if (!context.mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: const Color(0xFF2a2a4e),
+          title: Text(
+            '$level 문장 — 카테고리 선택',
+            style: const TextStyle(color: Colors.white),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildQuizTypeOption(
+                  ctx,
+                  icon: Icons.shuffle,
+                  label: '전체 카테고리',
+                  description: '$level 레벨 전체에서 랜덤 20개',
+                  color: Colors.blueGrey,
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SentenceStudyScreen(level: level),
+                      ),
+                    );
+                  },
+                ),
+                ...categories.map((cat) => Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: _buildQuizTypeOption(
+                        ctx,
+                        icon: Icons.category,
+                        label: cat,
+                        description: '$level / $cat 문장 학습',
+                        color: const Color(0xFF764ba2),
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SentenceStudyScreen(
+                                  level: level, category: cat),
+                            ),
+                          );
+                        },
+                      ),
+                    )),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   void _showQuizTypeDialog(BuildContext context) {
@@ -407,12 +674,7 @@ class HomeScreen extends StatelessWidget {
               color: const Color(0xFF43a047),
               onTap: () {
                 Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const RadioScreen(mode: 'word'),
-                  ),
-                );
+                _showRadioLevelDialog(context, 'word');
               },
             ),
             const SizedBox(height: 12),
@@ -424,15 +686,137 @@ class HomeScreen extends StatelessWidget {
               color: const Color(0xFF43a047),
               onTap: () {
                 Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const RadioScreen(mode: 'sentence'),
-                  ),
-                );
+                _showRadioLevelDialog(context, 'sentence');
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showRadioLevelDialog(BuildContext context, String radioMode) {
+    final modeLabel = radioMode == 'word' ? '단어' : '문장';
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: Text(
+          '$modeLabel 라디오 — 레벨 선택',
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.shuffle,
+                label: '전체 랜덤',
+                description: '모든 레벨에서 랜덤 20개',
+                color: Colors.blueGrey,
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RadioScreen(mode: radioMode),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_one,
+                label: 'N5 (초급)',
+                description: 'N5 레벨 $modeLabel 20개',
+                color: const Color(0xFF43a047),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          RadioScreen(mode: radioMode, level: 'N5'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_two,
+                label: 'N4 (중급)',
+                description: 'N4 레벨 $modeLabel 20개',
+                color: const Color(0xFFf5a623),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          RadioScreen(mode: radioMode, level: 'N4'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_3,
+                label: 'N3 (상급)',
+                description: 'N3 레벨 $modeLabel 20개',
+                color: const Color(0xFFe96743),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          RadioScreen(mode: radioMode, level: 'N3'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_4,
+                label: 'N2 (상상급)',
+                description: 'N2 레벨 $modeLabel 20개',
+                color: const Color(0xFF5c6bc0),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          RadioScreen(mode: radioMode, level: 'N2'),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildQuizTypeOption(
+                ctx,
+                icon: Icons.looks_5,
+                label: 'N1 (최상급)',
+                description: 'N1 레벨 $modeLabel 20개',
+                color: const Color(0xFF9c27b0),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          RadioScreen(mode: radioMode, level: 'N1'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -586,6 +970,21 @@ class HomeScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (_) => const WrongAnswerScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.assessment, color: Colors.purpleAccent),
+              title: const Text('레벨 테스트',
+                  style: TextStyle(color: Colors.white)),
+              subtitle: const Text('내 JLPT 레벨 측정하기',
+                  style: TextStyle(color: Colors.white38, fontSize: 12)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const LevelTestScreen()),
                 );
               },
             ),

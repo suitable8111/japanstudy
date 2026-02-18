@@ -264,7 +264,28 @@ class QuizProvider extends ChangeNotifier {
 
     final random = Random();
 
-    if (type == 'word') {
+    if (type.startsWith('kana_')) {
+      // 음절 오답 재도전: 음절 데이터에서만 선택지 생성
+      final kanaType = type.replaceFirst('kana_', '');
+      await _kanaService.loadKana();
+      final allKana = _kanaService.getKanaByType(kanaType);
+      final allKoreans = allKana.map((k) => k.korean).toSet().toList();
+
+      for (final item in items) {
+        final wrongAnswers = allKoreans
+            .where((k) => k != item.korean)
+            .toList()
+          ..shuffle(random);
+        final choices = [item.korean, ...wrongAnswers.take(3)];
+        choices.shuffle(random);
+        _questions.add(QuizQuestion(
+          japanese: item.japanese,
+          reading: item.reading,
+          correctAnswer: item.korean,
+          choices: choices,
+        ));
+      }
+    } else if (type == 'word') {
       await _wordService.loadWords();
       final allWords = _wordService.getRandomWords(1000);
       final allKoreans = allWords.map((w) => w.korean).toSet().toList();
@@ -308,7 +329,7 @@ class QuizProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
 
-    if (_questions.isNotEmpty) {
+    if (_questions.isNotEmpty && !type.startsWith('kana_')) {
       await _ttsService.speakJapanese(
           type == 'word' ? _questions[0].reading : _questions[0].japanese);
     }

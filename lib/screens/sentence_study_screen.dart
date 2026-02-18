@@ -4,7 +4,10 @@ import '../providers/sentence_provider.dart';
 import '../providers/history_provider.dart';
 
 class SentenceStudyScreen extends StatefulWidget {
-  const SentenceStudyScreen({super.key});
+  final String? level;
+  final String? category;
+
+  const SentenceStudyScreen({super.key, this.level, this.category});
 
   @override
   State<SentenceStudyScreen> createState() => _SentenceStudyScreenState();
@@ -13,11 +16,23 @@ class SentenceStudyScreen extends StatefulWidget {
 class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
   bool _historySaved = false;
 
+  String _buildTitle() {
+    final parts = <String>['문장 해석하기'];
+    if (widget.level != null || widget.category != null) {
+      final filters = <String>[];
+      if (widget.level != null) filters.add(widget.level!);
+      if (widget.category != null) filters.add(widget.category!);
+      parts.add('(${filters.join(' / ')})');
+    }
+    return parts.join(' ');
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SentenceProvider>().startTest();
+      context.read<SentenceProvider>().startTest(
+            level: widget.level, category: widget.category);
     });
   }
 
@@ -26,7 +41,7 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: const Text('문장 해석하기'),
+        title: Text(_buildTitle()),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -265,7 +280,8 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
             ),
             const SizedBox(height: 48),
             ElevatedButton.icon(
-              onPressed: () => provider.startTest(),
+              onPressed: () => provider.startTest(
+                    level: widget.level, category: widget.category),
               icon: const Icon(Icons.refresh),
               label:
                   const Text('다시 테스트하기', style: TextStyle(fontSize: 16)),
