@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/history_provider.dart';
 import '../services/sentence_service.dart';
+import '../widgets/rolling_ticker.dart';
 import 'word_study_screen.dart';
 import 'sentence_study_screen.dart';
 import 'kana_study_screen.dart';
@@ -14,6 +15,7 @@ import 'ranking_screen.dart';
 import 'wrong_answer_screen.dart';
 import 'settings_screen.dart';
 import 'level_test_screen.dart';
+import 'stats_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -77,7 +79,25 @@ class HomeScreen extends StatelessWidget {
                         '일본어 학습',
                         style: TextStyle(fontSize: 16, color: Colors.white70),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
+                      Consumer<HistoryProvider>(
+                        builder: (context, history, _) {
+                          final items = [
+                            '오늘 학습: ${history.todayStudyCount}회',
+                            '누적 학습: ${history.coreStudyCount}회',
+                            '오늘 퀴즈: ${history.todayQuizCount}회',
+                            '누적 퀴즈: ${history.coreQuizCount}회',
+                            '퀴즈 정답률: ${history.overallQuizAccuracy.toStringAsFixed(1)}%',
+                            '연속 학습: ${history.currentStreak}일',
+                            '오답 노트: ${history.wrongAnswerCount}개',
+                          ];
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: RollingTicker(items: items),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
                       _buildMenuButton(
                         context,
                         icon: Icons.abc,
@@ -882,75 +902,8 @@ class HomeScreen extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            // 프로필 헤더
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundColor: Colors.white24,
-                    backgroundImage: user?.photoURL != null
-                        ? NetworkImage(user!.photoURL!)
-                        : null,
-                    child: user?.photoURL == null
-                        ? const Icon(Icons.person, size: 36, color: Colors.white)
-                        : null,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    displayName,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  if (email.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      email,
-                      style: const TextStyle(fontSize: 14, color: Colors.white70),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            // 학습 통계
-            Consumer<HistoryProvider>(
-              builder: (_, provider, _) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStatItem(
-                          '총 학습', '${provider.totalStudySessions}회'),
-                      _buildStatItem(
-                          '단어', '${provider.wordStudyCount}회'),
-                      _buildStatItem(
-                          '문장', '${provider.sentenceStudyCount}회'),
-                      _buildStatItem(
-                          '퀴즈', '${provider.quizCount}회'),
-                    ],
-                  ),
-                );
-              },
-            ),
-            const Divider(color: Colors.white12),
-            // 메뉴 목록
-            ListTile(
-              leading: const Icon(Icons.person, color: Colors.white70),
-              title: const Text('내 프로필',
-                  style: TextStyle(color: Colors.white)),
+            // 프로필 헤더 (탭하면 내 프로필로 이동)
+            GestureDetector(
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -958,21 +911,49 @@ class HomeScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => const ProfileScreen()),
                 );
               },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 32,
+                      backgroundColor: Colors.white24,
+                      backgroundImage: user?.photoURL != null
+                          ? NetworkImage(user!.photoURL!)
+                          : null,
+                      child: user?.photoURL == null
+                          ? const Icon(Icons.person, size: 36, color: Colors.white)
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      displayName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    if (email.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        email,
+                        style: const TextStyle(fontSize: 14, color: Colors.white70),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ),
-            ListTile(
-              leading:
-                  const Icon(Icons.assignment_late, color: Colors.white70),
-              title: const Text('오답 노트',
-                  style: TextStyle(color: Colors.white)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const WrongAnswerScreen()),
-                );
-              },
-            ),
+            const Divider(color: Colors.white12, height: 1),
+            // 메뉴 목록
             ListTile(
               leading: const Icon(Icons.assessment, color: Colors.purpleAccent),
               title: const Text('레벨 테스트',
@@ -989,6 +970,30 @@ class HomeScreen extends StatelessWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.person, color: Colors.white70),
+              title: const Text('내 프로필',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bar_chart, color: Colors.white70),
+              title: const Text('학습 통계',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const StatsScreen()),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.leaderboard, color: Colors.white70),
               title: const Text('랭킹',
                   style: TextStyle(color: Colors.white)),
@@ -997,6 +1002,20 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const RankingScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading:
+                  const Icon(Icons.assignment_late, color: Colors.white70),
+              title: const Text('오답 노트',
+                  style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const WrongAnswerScreen()),
                 );
               },
             ),
@@ -1046,26 +1065,6 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.white54),
-        ),
-      ],
     );
   }
 

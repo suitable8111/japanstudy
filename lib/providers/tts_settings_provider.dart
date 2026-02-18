@@ -12,6 +12,9 @@ class TtsSettingsProvider extends ChangeNotifier {
   String? _selectedVoiceName;
   List<Map<String, String>> _availableVoices = [];
 
+  // 퀴즈 설정
+  int _quizCount = 20;
+
   // Google Cloud TTS 설정
   String _apiKey = '';
   String _cloudVoiceName = 'ja-JP-Neural2-C';
@@ -23,6 +26,7 @@ class TtsSettingsProvider extends ChangeNotifier {
   String get voiceGender => _voiceGender;
   String? get selectedVoiceName => _selectedVoiceName;
   List<Map<String, String>> get availableVoices => _availableVoices;
+  int get quizCount => _quizCount;
   String get apiKey => _apiKey;
   String get cloudVoiceName => _cloudVoiceName;
 
@@ -33,6 +37,7 @@ class TtsSettingsProvider extends ChangeNotifier {
     _pitch = prefs.getDouble('tts_pitch') ?? 1.05;
     _voiceGender = prefs.getString('tts_voice_gender') ?? 'female';
     _selectedVoiceName = prefs.getString('tts_voice_name');
+    _quizCount = prefs.getInt('quiz_count') ?? 20;
     _apiKey = prefs.getString('tts_api_key') ?? '';
     _cloudVoiceName = prefs.getString('tts_cloud_voice') ?? 'ja-JP-Neural2-C';
     notifyListeners();
@@ -89,6 +94,13 @@ class TtsSettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('tts_cloud_voice', name);
+  }
+
+  Future<void> setQuizCount(int count) async {
+    _quizCount = count;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('quiz_count', count);
   }
 
   void setAvailableVoices(List<Map<String, String>> voices) {

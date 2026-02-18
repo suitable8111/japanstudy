@@ -99,16 +99,27 @@ class JapanStudyApp extends StatelessWidget {
   }
 }
 
-class _AuthGate extends StatelessWidget {
+class _AuthGate extends StatefulWidget {
   const _AuthGate();
+
+  @override
+  State<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<_AuthGate> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final uid = context.read<AuthProvider>().user?.uid;
+    final historyProvider = context.read<HistoryProvider>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      historyProvider.setUid(uid);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
-    final historyProvider = context.read<HistoryProvider>();
-
-    // uid가 바뀌면 HistoryProvider에 전달
-    historyProvider.setUid(authProvider.user?.uid);
 
     if (authProvider.user != null) {
       return const HomeScreen();

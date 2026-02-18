@@ -27,6 +27,9 @@ class ProfileScreen extends StatelessWidget {
             // 유저 정보 헤더
             _buildUserHeader(user),
             const SizedBox(height: 24),
+            // 학습 요약
+            _buildStudySummary(historyProvider),
+            const SizedBox(height: 24),
             // 최근 30일 학습 캘린더
             _buildCalendarSection(historyProvider),
             const SizedBox(height: 24),
@@ -81,6 +84,163 @@ class ProfileScreen extends StatelessWidget {
                         const TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                 ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStudySummary(HistoryProvider provider) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '학습 요약',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryTile(
+                  icon: Icons.today,
+                  label: '오늘 학습',
+                  value: '${provider.todayStudyCount}회',
+                  color: const Color(0xFF667eea),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSummaryTile(
+                  icon: Icons.library_books,
+                  label: '누적 학습',
+                  value: '${provider.coreStudyCount}회',
+                  color: const Color(0xFF764ba2),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryTile(
+                  icon: Icons.quiz,
+                  label: '오늘 퀴즈',
+                  value: '${provider.todayQuizCount}회',
+                  color: const Color(0xFFe96743),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSummaryTile(
+                  icon: Icons.assignment,
+                  label: '누적 퀴즈',
+                  value: '${provider.coreQuizCount}회',
+                  color: const Color(0xFFf5a623),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryTile(
+                  icon: Icons.percent,
+                  label: '퀴즈 정답률',
+                  value: '${provider.overallQuizAccuracy.toStringAsFixed(1)}%',
+                  color: const Color(0xFF43a047),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSummaryTile(
+                  icon: Icons.local_fire_department,
+                  label: '연속 학습',
+                  value: '${provider.currentStreak}일',
+                  color: Colors.deepOrange,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryTile(
+                  icon: Icons.assignment_late,
+                  label: '오답 노트',
+                  value: '${provider.wrongAnswerCount}개',
+                  color: Colors.redAccent,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSummaryTile(
+                  icon: Icons.auto_stories,
+                  label: '총 세션',
+                  value: '${provider.totalStudySessions}회',
+                  color: Colors.blueGrey,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryTile({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: color.withValues(alpha: 0.8),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ],
             ),
           ),

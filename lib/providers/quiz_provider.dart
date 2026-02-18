@@ -61,7 +61,7 @@ class QuizProvider extends ChangeNotifier {
   String get progressText => '${_currentIndex + 1} / $totalCount';
   int get correctCount => _questions.where((q) => q.isCorrect).length;
 
-  Future<void> startQuiz(String type, {String? difficulty}) async {
+  Future<void> startQuiz(String type, {String? difficulty, int count = 20}) async {
     _quizType = type;
     _difficulty = difficulty;
     _isLoading = true;
@@ -72,15 +72,15 @@ class QuizProvider extends ChangeNotifier {
 
     if (type == 'word') {
       if (difficulty != null) {
-        await _generateWordQuizByLevel(difficulty);
+        await _generateWordQuizByLevel(difficulty, count: count);
       } else {
-        await _generateWordQuiz();
+        await _generateWordQuiz(count: count);
       }
     } else {
       if (difficulty != null) {
-        await _generateSentenceQuizByLevel(difficulty);
+        await _generateSentenceQuizByLevel(difficulty, count: count);
       } else {
-        await _generateSentenceQuiz();
+        await _generateSentenceQuiz(count: count);
       }
     }
 
@@ -93,14 +93,14 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _generateWordQuiz() async {
+  Future<void> _generateWordQuiz({int count = 20}) async {
     await _wordService.loadWords();
     final allWords = _wordService.getRandomWords(1000); // 전체 가져오기
     if (allWords.length < 4) return;
 
     final random = Random();
     final selected = List<Word>.from(allWords)..shuffle(random);
-    final quizWords = selected.take(20.clamp(0, selected.length)).toList();
+    final quizWords = selected.take(count.clamp(0, selected.length)).toList();
 
     for (final word in quizWords) {
       final wrongAnswers = allWords
@@ -122,7 +122,7 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _generateSentenceQuiz() async {
+  Future<void> _generateSentenceQuiz({int count = 20}) async {
     await _sentenceService.loadSentences();
     final allSentences =
         _sentenceService.getRandomSentences(1000); // 전체 가져오기
@@ -131,7 +131,7 @@ class QuizProvider extends ChangeNotifier {
     final random = Random();
     final selected = List<Sentence>.from(allSentences)..shuffle(random);
     final quizSentences =
-        selected.take(20.clamp(0, selected.length)).toList();
+        selected.take(count.clamp(0, selected.length)).toList();
 
     for (final sentence in quizSentences) {
       final wrongAnswers = allSentences
@@ -153,13 +153,16 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _generateWordQuizByLevel(String level) async {
+  Future<void> _generateWordQuizByLevel(String level, {int count = 20}) async {
     await _wordService.loadWords();
     final allWords = _wordService.getRandomWords(1000);
     if (allWords.length < 4) return;
 
     final random = Random();
-    final quizWords = _wordService.getRandomWordsByLevel(level);
+    final primaryCount = (count * 0.8).round();
+    final otherCount = count - primaryCount;
+    final quizWords = _wordService.getRandomWordsByLevel(level,
+        primaryCount: primaryCount, otherCount: otherCount);
 
     for (final word in quizWords) {
       final wrongAnswers = allWords
@@ -181,13 +184,16 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> _generateSentenceQuizByLevel(String level) async {
+  Future<void> _generateSentenceQuizByLevel(String level, {int count = 20}) async {
     await _sentenceService.loadSentences();
     final allSentences = _sentenceService.getRandomSentences(1000);
     if (allSentences.length < 4) return;
 
     final random = Random();
-    final quizSentences = _sentenceService.getRandomSentencesByLevel(level);
+    final primaryCount = (count * 0.8).round();
+    final otherCount = count - primaryCount;
+    final quizSentences = _sentenceService.getRandomSentencesByLevel(level,
+        primaryCount: primaryCount, otherCount: otherCount);
 
     for (final sentence in quizSentences) {
       final wrongAnswers = allSentences
@@ -209,7 +215,7 @@ class QuizProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> startKanaQuiz(String kanaType) async {
+  Future<void> startKanaQuiz(String kanaType, {int count = 20}) async {
     _quizType = 'kana_$kanaType';
     _difficulty = null;
     _isLoading = true;
@@ -228,7 +234,7 @@ class QuizProvider extends ChangeNotifier {
 
     final random = Random();
     final selected = List.from(allKana)..shuffle(random);
-    final quizKana = selected.take(20.clamp(0, selected.length)).toList();
+    final quizKana = selected.take(count.clamp(0, selected.length)).toList();
 
     for (final kana in quizKana) {
       final wrongAnswers = allKana

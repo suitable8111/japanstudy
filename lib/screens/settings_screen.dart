@@ -66,6 +66,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
+              // 퀴즈 문항 수 설정
+              _buildSectionTitle('퀴즈 문항 수'),
+              const SizedBox(height: 4),
+              const Text(
+                '퀴즈 한 회차에 출제되는 문제 수',
+                style: TextStyle(color: Colors.white54, fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [10, 20, 30, 50].map((count) {
+                  final isSelected = settings.quizCount == count;
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: GestureDetector(
+                        onTap: () => settings.setQuizCount(count),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFFe96743).withValues(alpha: 0.3)
+                                : Colors.white.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? const Color(0xFFe96743)
+                                  : Colors.white24,
+                              width: isSelected ? 2 : 1,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '$count개',
+                              style: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.white54,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 28),
+
               // TTS 엔진 선택
               _buildSectionTitle('TTS 엔진'),
               const SizedBox(height: 12),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/quiz_provider.dart';
 import '../providers/history_provider.dart';
+import '../providers/tts_settings_provider.dart';
 import '../models/study_record.dart';
 import '../services/firestore_service.dart';
 
@@ -29,17 +30,18 @@ class _QuizScreenState extends State<QuizScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final quizCount = context.read<TtsSettingsProvider>().quizCount;
       if (widget.wrongItems != null) {
         context
             .read<QuizProvider>()
             .startQuizFromItems(widget.wrongItems!, widget.quizType);
       } else if (widget.quizType.startsWith('kana_')) {
         final kanaType = widget.quizType.replaceFirst('kana_', '');
-        context.read<QuizProvider>().startKanaQuiz(kanaType);
+        context.read<QuizProvider>().startKanaQuiz(kanaType, count: quizCount);
       } else {
         context
             .read<QuizProvider>()
-            .startQuiz(widget.quizType, difficulty: widget.difficulty);
+            .startQuiz(widget.quizType, difficulty: widget.difficulty, count: quizCount);
       }
     });
   }
@@ -430,12 +432,13 @@ class _QuizScreenState extends State<QuizScreen> {
             ElevatedButton.icon(
               onPressed: () {
                 _statsSaved = false;
+                final quizCount = context.read<TtsSettingsProvider>().quizCount;
                 if (_isKanaQuiz) {
                   final kanaType = widget.quizType.replaceFirst('kana_', '');
-                  provider.startKanaQuiz(kanaType);
+                  provider.startKanaQuiz(kanaType, count: quizCount);
                 } else {
                   provider.startQuiz(widget.quizType,
-                      difficulty: widget.difficulty);
+                      difficulty: widget.difficulty, count: quizCount);
                 }
               },
               icon: const Icon(Icons.refresh),
