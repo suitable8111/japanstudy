@@ -310,4 +310,17 @@ class HistoryProvider extends ChangeNotifier {
       debugPrint('Failed to clear history: $e');
     }
   }
+
+  Future<void> clearAllData() async {
+    if (_uid == null) return;
+
+    try {
+      await _firestoreService.clearStudyRecords(_uid!);
+      await _firestoreService.clearUserStats(_uid!);
+      _records.clear();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Failed to clear all data: $e');
+    }
+  }
 }

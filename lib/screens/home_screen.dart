@@ -7,6 +7,7 @@ import '../widgets/rolling_ticker.dart';
 import 'word_study_screen.dart';
 import 'sentence_study_screen.dart';
 import 'kana_study_screen.dart';
+import 'kana_writing_screen.dart';
 import 'quiz_screen.dart';
 import 'radio_screen.dart';
 import 'history_screen.dart';
@@ -173,13 +174,7 @@ class HomeScreen extends StatelessWidget {
               color: Colors.teal,
               onTap: () {
                 Navigator.pop(ctx);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        const KanaStudyScreen(kanaType: 'hiragana'),
-                  ),
-                );
+                _showKanaModeDialog(context, 'hiragana');
               },
             ),
             const SizedBox(height: 12),
@@ -191,11 +186,60 @@ class HomeScreen extends StatelessWidget {
               color: Colors.orange,
               onTap: () {
                 Navigator.pop(ctx);
+                _showKanaModeDialog(context, 'katakana');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showKanaModeDialog(BuildContext context, String kanaType) {
+    final isHiragana = kanaType == 'hiragana';
+    final color = isHiragana ? Colors.teal : Colors.orange;
+    final typeName = isHiragana ? '히라가나' : '가타카나';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: Text(
+          '$typeName 학습 모드',
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.grid_view,
+              label: '공부하기',
+              description: '음절표를 보면서 발음 익히기',
+              color: color,
+              onTap: () {
+                Navigator.pop(ctx);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        const KanaStudyScreen(kanaType: 'katakana'),
+                    builder: (_) => KanaStudyScreen(kanaType: kanaType),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.edit,
+              label: '써보기',
+              description: '청음 46자를 손가락으로 따라 써보기',
+              color: color,
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => KanaWritingScreen(kanaType: kanaType),
                   ),
                 );
               },

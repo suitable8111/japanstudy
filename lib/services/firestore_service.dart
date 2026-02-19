@@ -92,6 +92,11 @@ class FirestoreService {
     await batch.commit();
   }
 
+  // 유저 통계 초기화
+  Future<void> clearUserStats(String uid) async {
+    await _db.collection('user_stats').doc(uid).delete();
+  }
+
   // 퀴즈 통계 업데이트 (user_stats)
   Future<void> updateUserStats(
     String uid,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/history_provider.dart';
 import '../providers/tts_settings_provider.dart';
 import '../providers/word_provider.dart';
 import '../services/google_cloud_tts_service.dart';
@@ -119,6 +120,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 28),
 
+              // 퀴즈 자동 음성
+              _buildSectionTitle('퀴즈 자동 음성'),
+              const SizedBox(height: 4),
+              const Text(
+                '퀴즈 문제가 나올 때 자동으로 음성을 재생합니다',
+                style: TextStyle(color: Colors.white54, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                value: settings.quizAutoTts,
+                onChanged: (value) => settings.setQuizAutoTts(value),
+                title: Text(
+                  settings.quizAutoTts ? '자동 재생 켜짐' : '자동 재생 꺼짐',
+                  style: const TextStyle(color: Colors.white, fontSize: 15),
+                ),
+                subtitle: Text(
+                  settings.quizAutoTts
+                      ? '문제마다 음성이 먼저 나옵니다'
+                      : '음성 없이 문장을 읽고 풀 수 있습니다',
+                  style: const TextStyle(color: Colors.white38, fontSize: 13),
+                ),
+                activeThumbColor: const Color(0xFF667eea),
+                inactiveThumbColor: Colors.white38,
+                inactiveTrackColor: Colors.white12,
+                contentPadding: EdgeInsets.zero,
+              ),
+              const SizedBox(height: 28),
+
               // TTS 엔진 선택
               _buildSectionTitle('TTS 엔진'),
               const SizedBox(height: 12),
@@ -220,9 +249,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 40),
+
+              // 데이터 초기화
+              const Divider(color: Colors.white12),
+              const SizedBox(height: 20),
+              _buildSectionTitle('데이터 관리'),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showResetConfirmDialog(),
+                  icon: const Icon(Icons.delete_forever, size: 20),
+                  label: const Text('모든 학습 초기화',
+                      style: TextStyle(fontSize: 16)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade700,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                '학습 기록, 퀴즈 결과, 랭킹 통계가 모두 삭제됩니다.',
+                style: TextStyle(color: Colors.white38, fontSize: 12),
+              ),
+              const SizedBox(height: 40),
             ],
           );
         },
+      ),
+    );
+  }
+
+  void _showResetConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: const Text(
+          '모든 학습 초기화',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          '학습 기록, 퀴즈 결과, 랭킹 통계가 모두 삭제됩니다.\n\n이 작업은 되돌릴 수 없습니다. 정말 초기화하시겠습니까?',
+          style: TextStyle(color: Colors.white70, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소',
+                style: TextStyle(color: Colors.white54)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await context.read<HistoryProvider>().clearAllData();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('모든 학습 기록이 초기화되었습니다.')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('초기화'),
+          ),
+        ],
       ),
     );
   }

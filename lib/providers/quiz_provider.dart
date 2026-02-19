@@ -36,8 +36,12 @@ class QuizProvider extends ChangeNotifier {
   final TtsService _ttsService = TtsService();
   TtsService get ttsService => _ttsService;
 
+  bool _quizAutoTts = true;
+  bool get quizAutoTts => _quizAutoTts;
+
   void updateTtsSettings(TtsSettingsProvider settings) {
     _ttsService.applySettings(settings);
+    _quizAutoTts = settings.quizAutoTts;
   }
 
   String _quizType = 'word'; // 'word' or 'sentence'
@@ -87,7 +91,7 @@ class QuizProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
 
-    if (_questions.isNotEmpty) {
+    if (_quizAutoTts && _questions.isNotEmpty) {
       await _ttsService.speakJapanese(
           type == 'word' ? _questions[0].reading : _questions[0].japanese);
     }
@@ -335,7 +339,7 @@ class QuizProvider extends ChangeNotifier {
     _isLoading = false;
     notifyListeners();
 
-    if (_questions.isNotEmpty && !type.startsWith('kana_')) {
+    if (_quizAutoTts && _questions.isNotEmpty && !type.startsWith('kana_')) {
       await _ttsService.speakJapanese(
           type == 'word' ? _questions[0].reading : _questions[0].japanese);
     }
@@ -367,7 +371,7 @@ class QuizProvider extends ChangeNotifier {
     _currentIndex++;
     notifyListeners();
 
-    if (!isKanaQuiz) {
+    if (_quizAutoTts && !isKanaQuiz) {
       await _ttsService.speakJapanese(_quizType == 'word'
           ? _questions[_currentIndex].reading
           : _questions[_currentIndex].japanese);

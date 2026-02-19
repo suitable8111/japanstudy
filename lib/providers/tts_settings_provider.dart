@@ -14,6 +14,7 @@ class TtsSettingsProvider extends ChangeNotifier {
 
   // 퀴즈 설정
   int _quizCount = 20;
+  bool _quizAutoTts = true;
 
   // Google Cloud TTS 설정
   String _apiKey = '';
@@ -27,6 +28,7 @@ class TtsSettingsProvider extends ChangeNotifier {
   String? get selectedVoiceName => _selectedVoiceName;
   List<Map<String, String>> get availableVoices => _availableVoices;
   int get quizCount => _quizCount;
+  bool get quizAutoTts => _quizAutoTts;
   String get apiKey => _apiKey;
   String get cloudVoiceName => _cloudVoiceName;
 
@@ -38,6 +40,7 @@ class TtsSettingsProvider extends ChangeNotifier {
     _voiceGender = prefs.getString('tts_voice_gender') ?? 'female';
     _selectedVoiceName = prefs.getString('tts_voice_name');
     _quizCount = prefs.getInt('quiz_count') ?? 20;
+    _quizAutoTts = prefs.getBool('quiz_auto_tts') ?? true;
     _apiKey = prefs.getString('tts_api_key') ?? '';
     _cloudVoiceName = prefs.getString('tts_cloud_voice') ?? 'ja-JP-Neural2-C';
     notifyListeners();
@@ -101,6 +104,13 @@ class TtsSettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('quiz_count', count);
+  }
+
+  Future<void> setQuizAutoTts(bool value) async {
+    _quizAutoTts = value;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('quiz_auto_tts', value);
   }
 
   void setAvailableVoices(List<Map<String, String>> voices) {
