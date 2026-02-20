@@ -7,8 +7,15 @@ import '../widgets/drawing_canvas.dart';
 
 class KanaWritingScreen extends StatefulWidget {
   final String kanaType; // 'hiragana' or 'katakana'
+  final bool shuffle;
+  final bool blindMode; // 글자를 가리고 발음/음절만으로 써보기
 
-  const KanaWritingScreen({super.key, required this.kanaType});
+  const KanaWritingScreen({
+    super.key,
+    required this.kanaType,
+    this.shuffle = false,
+    this.blindMode = false,
+  });
 
   @override
   State<KanaWritingScreen> createState() => _KanaWritingScreenState();
@@ -22,9 +29,14 @@ class _KanaWritingScreenState extends State<KanaWritingScreen> {
   List<Kana> _kanaList = [];
   int _currentIndex = 0;
   bool _isLoading = true;
+  bool _revealed = false;
+  bool _transitioning = false;
 
   bool get _isHiragana => widget.kanaType == 'hiragana';
-  String get _title => _isHiragana ? '히라가나 써보기' : '가타카나 써보기';
+  String get _title {
+    final typeName = _isHiragana ? '히라가나' : '가타카나';
+    return widget.blindMode ? '$typeName 써보기 (발음만)' : '$typeName 써보기';
+  }
   MaterialColor get _themeColor => _isHiragana ? Colors.teal : Colors.orange;
 
   static const _seionHiragana = {
@@ -47,6 +59,10 @@ class _KanaWritingScreenState extends State<KanaWritingScreen> {
     final seionKana =
         allKana.where((k) => seionRows.contains(k.row)).toList();
 
+    if (widget.shuffle) {
+      seionKana.shuffle();
+    }
+
     setState(() {
       _kanaList = seionKana;
       _isLoading = false;
@@ -66,14 +82,36 @@ class _KanaWritingScreenState extends State<KanaWritingScreen> {
     _strokesNotifier.value = [];
   }
 
-  void _nextKana() {
+  void _prevKana() {
+    if (_currentIndex <= 0) return;
+    setState(() {
+      _currentIndex--;
+      _revealed = false;
+    });
+    _clearCanvas();
+    _speakCurrent();
+  }
+
+  Future<void> _nextKana() async {
+    if (_transitioning) return;
+
+    // 정답을 1초 보여주고 넘어감
+    setState(() {
+      _revealed = true;
+      _transitioning = true;
+    });
+
+    await Future.delayed(const Duration(milliseconds: 900));
+    if (!mounted) return;
+
     if (_currentIndex >= _kanaList.length - 1) {
-      // Last character — go back
       Navigator.pop(context);
       return;
     }
     setState(() {
       _currentIndex++;
+      _revealed = false;
+      _transitioning = false;
     });
     _clearCanvas();
     _speakCurrent();
@@ -122,23 +160,42 @@ class _KanaWritingScreenState extends State<KanaWritingScreen> {
                         ),
                       ),
                       // Guide character
-                      Text(
-                        _kanaList[_currentIndex].japanese,
-                        style: const TextStyle(
-                          fontSize: 80,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w300,
+                      if (widget.blindMode && !_revealed)
+                        Text(
+                          '?',
+                          style: TextStyle(
+                            fontSize: 80,
+                            color: _themeColor.shade200,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        )
+                      else
+                        Text(
+                          _kanaList[_currentIndex].japanese,
+                          style: const TextStyle(
+                            fontSize: 80,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w300,
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 4),
                       // Korean + romanji
-                      Text(
-                        '${_kanaList[_currentIndex].korean} (${_kanaList[_currentIndex].reading})',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.white70,
+                      if (widget.blindMode && !_revealed)
+                        Text(
+                          _kanaList[_currentIndex].korean,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.white70,
+                          ),
+                        )
+                      else
+                        Text(
+                          '${_kanaList[_currentIndex].korean} (${_kanaList[_currentIndex].reading})',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.white70,
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 16),
                       // Canvas
                       Expanded(
@@ -148,12 +205,87 @@ class _KanaWritingScreenState extends State<KanaWritingScreen> {
                               strokesNotifier: _strokesNotifier),
                         ),
                       ),
-                      // Buttons
+                      // Blind mode: 다시 듣기 + 정답 보기 버튼
+                      if (widget.blindMode)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: _speakCurrent,
+                                  icon: const Icon(Icons.volume_up, size: 20),
+                                  label: const Text('다시 듣기'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: _themeColor.shade200,
+                                    side: BorderSide(
+                                      color: _themeColor.withValues(alpha: 0.5),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: _revealed
+                                      ? null
+                                      : () => setState(() => _revealed = true),
+                                  icon: Icon(
+                                    _revealed ? Icons.visibility : Icons.visibility_off,
+                                    size: 20,
+                                  ),
+                                  label: Text(_revealed ? '정답 표시중' : '정답 보기'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.amber.shade200,
+                                    disabledForegroundColor: Colors.white38,
+                                    side: BorderSide(
+                                      color: _revealed
+                                          ? Colors.white24
+                                          : Colors.amber.withValues(alpha: 0.5),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      // Buttons: 이전 / 지우기 / 다음
                       Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 16),
+                            horizontal: 24, vertical: 8),
                         child: Row(
                           children: [
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _currentIndex > 0 ? _prevKana : null,
+                                icon: const Icon(Icons.arrow_back, size: 20),
+                                label: const Text('이전'),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Colors.white70,
+                                  disabledForegroundColor: Colors.white24,
+                                  side: BorderSide(
+                                    color: _currentIndex > 0
+                                        ? Colors.white.withValues(alpha: 0.3)
+                                        : Colors.white.withValues(alpha: 0.1),
+                                  ),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: OutlinedButton.icon(
                                 onPressed: _clearCanvas,
@@ -173,20 +305,31 @@ class _KanaWritingScreenState extends State<KanaWritingScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: ElevatedButton.icon(
-                                onPressed: _nextKana,
-                                icon: Icon(
-                                  _currentIndex >= _kanaList.length - 1
-                                      ? Icons.check
-                                      : Icons.arrow_forward,
-                                  size: 20,
-                                ),
+                                onPressed: _transitioning ? null : _nextKana,
+                                icon: _transitioning
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white70,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : Icon(
+                                        _currentIndex >= _kanaList.length - 1
+                                            ? Icons.check
+                                            : Icons.arrow_forward,
+                                        size: 20,
+                                      ),
                                 label: Text(
-                                  _currentIndex >= _kanaList.length - 1
-                                      ? '완료'
-                                      : '다음',
+                                  _transitioning
+                                      ? ''
+                                      : _currentIndex >= _kanaList.length - 1
+                                          ? '완료'
+                                          : '다음',
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: _themeColor,

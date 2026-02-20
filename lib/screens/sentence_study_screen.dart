@@ -17,7 +17,7 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
   bool _historySaved = false;
 
   String _buildTitle() {
-    final parts = <String>['문장 해석하기'];
+    final parts = <String>['문장 외우기'];
     if (widget.level != null || widget.category != null) {
       final filters = <String>[];
       if (widget.level != null) filters.add(widget.level!);
@@ -32,7 +32,9 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<SentenceProvider>().startTest(
-            level: widget.level, category: widget.category);
+        level: widget.level,
+        category: widget.category,
+      );
     });
   }
 
@@ -56,8 +58,7 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
                   padding: const EdgeInsets.only(right: 16),
                   child: Text(
                     provider.progressText,
-                    style:
-                        const TextStyle(fontSize: 16, color: Colors.white70),
+                    style: const TextStyle(fontSize: 16, color: Colors.white70),
                   ),
                 ),
               );
@@ -124,8 +125,9 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
               LinearProgressIndicator(
                 value: (provider.currentIndex + 1) / provider.totalCount,
                 backgroundColor: Colors.white12,
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(Color(0xFF764ba2)),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  Color(0xFF764ba2),
+                ),
                 minHeight: 4,
                 borderRadius: BorderRadius.circular(2),
               ),
@@ -135,22 +137,25 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: _getLevelColor(sentence.level),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       sentence.level,
-                      style:
-                          const TextStyle(color: Colors.white, fontSize: 12),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
@@ -158,7 +163,9 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
                     child: Text(
                       sentence.category,
                       style: const TextStyle(
-                          color: Colors.white70, fontSize: 12),
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -189,11 +196,7 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
                 duration: const Duration(milliseconds: 300),
                 child: Column(
                   children: [
-                    Container(
-                      width: 60,
-                      height: 2,
-                      color: Colors.white24,
-                    ),
+                    Container(width: 60, height: 2, color: Colors.white24),
                     const SizedBox(height: 20),
                     Text(
                       provider.showAnswer ? sentence.korean : '',
@@ -249,7 +252,9 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
   }
 
   Widget _buildCompletionScreen(
-      BuildContext context, SentenceProvider provider) {
+    BuildContext context,
+    SentenceProvider provider,
+  ) {
     if (!_historySaved) {
       _historySaved = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -281,15 +286,18 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
             const SizedBox(height: 48),
             ElevatedButton.icon(
               onPressed: () => provider.startTest(
-                    level: widget.level, category: widget.category),
+                level: widget.level,
+                category: widget.category,
+              ),
               icon: const Icon(Icons.refresh),
-              label:
-                  const Text('다시 테스트하기', style: TextStyle(fontSize: 16)),
+              label: const Text('다시 테스트하기', style: TextStyle(fontSize: 16)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF764ba2),
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
