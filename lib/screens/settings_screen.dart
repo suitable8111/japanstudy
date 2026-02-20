@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/history_provider.dart';
 import '../providers/tts_settings_provider.dart';
+import '../providers/theme_provider.dart';
 import '../providers/word_provider.dart';
 import '../services/google_cloud_tts_service.dart';
 
@@ -64,9 +65,67 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: Consumer<TtsSettingsProvider>(
         builder: (context, settings, _) {
+          final themeProvider = context.watch<ThemeProvider>();
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
+              // 앱 테마
+              _buildSectionTitle('앱 테마'),
+              const SizedBox(height: 4),
+              const Text(
+                '홈 화면 색상 테마를 선택하세요',
+                style: TextStyle(color: Colors.white54, fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(ThemeProvider.presets.length, (i) {
+                  final preset = ThemeProvider.presets[i];
+                  final isSelected = themeProvider.selectedIndex == i;
+                  return GestureDetector(
+                    onTap: () => themeProvider.selectTheme(i),
+                    child: Column(
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [preset.start, preset.end],
+                            ),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected ? Colors.white : Colors.transparent,
+                              width: 3,
+                            ),
+                            boxShadow: isSelected
+                                ? [BoxShadow(color: preset.start.withValues(alpha: 0.6), blurRadius: 8)]
+                                : null,
+                          ),
+                          child: isSelected
+                              ? const Icon(Icons.check, color: Colors.white, size: 22)
+                              : null,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          preset.name,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isSelected ? Colors.white : Colors.white54,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 28),
+              const Divider(color: Colors.white12),
+              const SizedBox(height: 20),
               // 퀴즈 문항 수 설정
               _buildSectionTitle('퀴즈 문항 수'),
               const SizedBox(height: 4),

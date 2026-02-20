@@ -11,6 +11,7 @@ import 'providers/radio_provider.dart';
 import 'providers/history_provider.dart';
 import 'providers/ranking_provider.dart';
 import 'providers/tts_settings_provider.dart';
+import 'providers/theme_provider.dart';
 import 'providers/level_test_provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
@@ -24,19 +25,24 @@ void main() async {
   final ttsSettings = TtsSettingsProvider();
   await ttsSettings.loadSettings();
 
-  runApp(JapanStudyApp(ttsSettings: ttsSettings));
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadSettings();
+
+  runApp(JapanStudyApp(ttsSettings: ttsSettings, themeProvider: themeProvider));
 }
 
 class JapanStudyApp extends StatelessWidget {
   final TtsSettingsProvider ttsSettings;
+  final ThemeProvider themeProvider;
 
-  const JapanStudyApp({super.key, required this.ttsSettings});
+  const JapanStudyApp({super.key, required this.ttsSettings, required this.themeProvider});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: ttsSettings),
+        ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
         ChangeNotifierProvider(create: (_) => RankingProvider()),
@@ -83,17 +89,19 @@ class JapanStudyApp extends StatelessWidget {
           },
         ),
       ],
-      child: MaterialApp(
-        title: 'JLPT 일기장',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF667eea),
-            brightness: Brightness.dark,
+      child: Consumer<ThemeProvider>(
+        builder: (context, theme, _) => MaterialApp(
+          title: 'JLPT 일기장',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: theme.primaryColor,
+              brightness: Brightness.dark,
+            ),
+            fontFamily: 'NotoSans',
           ),
-          fontFamily: 'NotoSans',
+          home: const _AuthGate(),
         ),
-        home: const _AuthGate(),
       ),
     );
   }

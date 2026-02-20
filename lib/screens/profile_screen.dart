@@ -2,6 +2,118 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/history_provider.dart';
+import '../providers/theme_provider.dart';
+
+// ─────────────────────────────────────────────
+// 배지 정의
+// ─────────────────────────────────────────────
+
+class _BadgeDef {
+  final String emoji;
+  final String name;
+  final String desc;
+  final Color color;
+  final bool Function(HistoryProvider) check;
+
+  _BadgeDef({
+    required this.emoji,
+    required this.name,
+    required this.desc,
+    required this.color,
+    required this.check,
+  });
+}
+
+final _badgeList = <_BadgeDef>[
+  // 스트릭
+  _BadgeDef(
+    emoji: '🔥', name: '첫 불꽃',    desc: '연속 1일 학습',
+    color: Colors.deepOrange,
+    check: (hp) => hp.currentStreak >= 1,
+  ),
+  _BadgeDef(
+    emoji: '🔥', name: '3일 연속',   desc: '3일 연속 학습',
+    color: Colors.orange,
+    check: (hp) => hp.currentStreak >= 3,
+  ),
+  _BadgeDef(
+    emoji: '🔥', name: '일주일 전사', desc: '7일 연속 학습',
+    color: Colors.red,
+    check: (hp) => hp.currentStreak >= 7,
+  ),
+  _BadgeDef(
+    emoji: '💜', name: '한 달 챔피언', desc: '30일 연속 학습',
+    color: Colors.purple,
+    check: (hp) => hp.currentStreak >= 30,
+  ),
+  // 학습
+  _BadgeDef(
+    emoji: '📖', name: '첫 발걸음',  desc: '학습 1회 완료',
+    color: Colors.blue,
+    check: (hp) => hp.totalStudySessions >= 1,
+  ),
+  _BadgeDef(
+    emoji: '📚', name: '단어 탐험가', desc: '단어 학습 10회',
+    color: const Color(0xFF667eea),
+    check: (hp) => hp.wordStudyCount >= 10,
+  ),
+  _BadgeDef(
+    emoji: '📝', name: '문장 탐구자', desc: '문장 학습 10회',
+    color: const Color(0xFF764ba2),
+    check: (hp) => hp.sentenceStudyCount >= 10,
+  ),
+  _BadgeDef(
+    emoji: '🎓', name: '학습 고수',  desc: '총 50세션 달성',
+    color: Colors.indigo,
+    check: (hp) => hp.totalStudySessions >= 50,
+  ),
+  // 퀴즈
+  _BadgeDef(
+    emoji: '🎯', name: '첫 퀴즈',    desc: '퀴즈 1회 도전',
+    color: const Color(0xFFe96743),
+    check: (hp) => hp.coreQuizCount >= 1,
+  ),
+  _BadgeDef(
+    emoji: '🎯', name: '퀴즈 달인',  desc: '퀴즈 20회 도전',
+    color: Colors.redAccent,
+    check: (hp) => hp.coreQuizCount >= 20,
+  ),
+  _BadgeDef(
+    emoji: '✨', name: '정확도 우수', desc: '정답률 80%+ (5회↑)',
+    color: const Color(0xFFf5a623),
+    check: (hp) => hp.overallQuizAccuracy >= 80 && hp.coreQuizCount >= 5,
+  ),
+  _BadgeDef(
+    emoji: '🏆', name: '퀴즈 마스터', desc: '정답률 90%+ (10회↑)',
+    color: const Color(0xFF43a047),
+    check: (hp) => hp.overallQuizAccuracy >= 90 && hp.coreQuizCount >= 10,
+  ),
+  // 누적 세션
+  _BadgeDef(
+    emoji: '⭐', name: '10회 달성',  desc: '총 10세션 완료',
+    color: Colors.amber,
+    check: (hp) => hp.totalStudySessions >= 10,
+  ),
+  _BadgeDef(
+    emoji: '🌟', name: '50회 달성',  desc: '총 50세션 완료',
+    color: Colors.orange,
+    check: (hp) => hp.totalStudySessions >= 50,
+  ),
+  _BadgeDef(
+    emoji: '👑', name: '100회 달성', desc: '총 100세션 완료',
+    color: Colors.yellow,
+    check: (hp) => hp.totalStudySessions >= 100,
+  ),
+  _BadgeDef(
+    emoji: '💎', name: '학습왕',     desc: '총 200세션 완료',
+    color: Colors.cyan,
+    check: (hp) => hp.totalStudySessions >= 200,
+  ),
+];
+
+// ─────────────────────────────────────────────
+// ProfileScreen
+// ─────────────────────────────────────────────
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -10,6 +122,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final historyProvider = context.watch<HistoryProvider>();
+    final themeGradient = context.watch<ThemeProvider>().gradient;
     final user = authProvider.user;
 
     return Scaffold(
@@ -24,16 +137,14 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // 유저 정보 헤더
-            _buildUserHeader(user),
+            _buildUserHeader(user, themeGradient),
             const SizedBox(height: 24),
-            // 학습 요약
             _buildStudySummary(historyProvider),
             const SizedBox(height: 24),
-            // 최근 30일 학습 캘린더
+            _buildBadgesSection(historyProvider),
+            const SizedBox(height: 24),
             _buildCalendarSection(historyProvider),
             const SizedBox(height: 24),
-            // 난이도별 퀴즈 통계
             _buildQuizStatsSection(historyProvider),
           ],
         ),
@@ -41,14 +152,14 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildUserHeader(dynamic user) {
+  // ── 유저 헤더 ──────────────────────────────
+
+  Widget _buildUserHeader(dynamic user, LinearGradient gradient) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-        ),
+        gradient: gradient,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -91,6 +202,8 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+
+  // ── 학습 요약 ──────────────────────────────
 
   Widget _buildStudySummary(HistoryProvider provider) {
     return Container(
@@ -249,6 +362,115 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  // ── 배지 섹션 ──────────────────────────────
+
+  Widget _buildBadgesSection(HistoryProvider hp) {
+    final earnedCount = _badgeList.where((b) => b.check(hp)).length;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '획득한 배지',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                '$earnedCount / ${_badgeList.length}',
+                style: const TextStyle(fontSize: 14, color: Colors.white54),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          GridView.count(
+            crossAxisCount: 4,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            childAspectRatio: 0.82,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: _badgeList.map((badge) {
+              final earned = badge.check(hp);
+              return _buildBadgeItem(badge, earned);
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBadgeItem(_BadgeDef badge, bool earned) {
+    return Tooltip(
+      message: badge.desc,
+      child: Container(
+        decoration: BoxDecoration(
+          color: earned
+              ? badge.color.withValues(alpha: 0.18)
+              : Colors.white.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: earned
+                ? badge.color.withValues(alpha: 0.5)
+                : Colors.white.withValues(alpha: 0.08),
+          ),
+        ),
+        child: Stack(
+          children: [
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Opacity(
+                    opacity: earned ? 1.0 : 0.18,
+                    child: Text(
+                      badge.emoji,
+                      style: const TextStyle(fontSize: 26),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text(
+                      badge.name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      style: TextStyle(
+                        fontSize: 9,
+                        height: 1.2,
+                        color: earned ? Colors.white70 : Colors.white24,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (!earned)
+              const Positioned(
+                top: 5,
+                right: 5,
+                child: Icon(Icons.lock_outline, size: 11, color: Colors.white24),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── 학습 활동 캘린더 ────────────────────────
+
   Widget _buildCalendarSection(HistoryProvider provider) {
     final activity = provider.studyActivityByDate;
     final now = DateTime.now();
@@ -272,7 +494,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          // 범례
           Row(
             children: [
               _buildLegend(Colors.blue, '단어'),
@@ -283,7 +504,6 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // 달력 그리드 (30일 전 ~ 10일 후 = 41일)
           Wrap(
             spacing: 4,
             runSpacing: 4,
@@ -293,12 +513,9 @@ class ProfileScreen extends StatelessWidget {
                   '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
               final types = activity[dateKey] ?? [];
 
-              final hasWord =
-                  types.any((t) => t == 'word');
-              final hasSentence =
-                  types.any((t) => t == 'sentence');
-              final hasQuiz =
-                  types.any((t) => t.startsWith('quiz'));
+              final hasWord = types.any((t) => t == 'word');
+              final hasSentence = types.any((t) => t == 'sentence');
+              final hasQuiz = types.any((t) => t.startsWith('quiz'));
 
               final isToday = date.day == now.day &&
                   date.month == now.month &&
@@ -396,16 +613,16 @@ class ProfileScreen extends StatelessWidget {
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.white54)),
+        Text(label,
+            style: const TextStyle(fontSize: 12, color: Colors.white54)),
       ],
     );
   }
+
+  // ── 난이도별 퀴즈 통계 ──────────────────────
 
   Widget _buildQuizStatsSection(HistoryProvider provider) {
     final stats = provider.quizStatsByDifficulty;
@@ -424,49 +641,19 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(
-              child: _buildStatCard(
-                'N1 (최상)',
-                stats['N1']!,
-                const Color(0xFF9c27b0),
-              ),
-            ),
+            Expanded(child: _buildStatCard('N1 (최상)', stats['N1']!, const Color(0xFF9c27b0))),
             const SizedBox(width: 8),
-            Expanded(
-              child: _buildStatCard(
-                'N2 (상상)',
-                stats['N2']!,
-                const Color(0xFF5c6bc0),
-              ),
-            ),
+            Expanded(child: _buildStatCard('N2 (상상)', stats['N2']!, const Color(0xFF5c6bc0))),
             const SizedBox(width: 8),
-            Expanded(
-              child: _buildStatCard(
-                'N3 (상)',
-                stats['N3']!,
-                const Color(0xFFe96743),
-              ),
-            ),
+            Expanded(child: _buildStatCard('N3 (상)',   stats['N3']!, const Color(0xFFe96743))),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            Expanded(
-              child: _buildStatCard(
-                'N4 (중)',
-                stats['N4']!,
-                const Color(0xFFf5a623),
-              ),
-            ),
+            Expanded(child: _buildStatCard('N4 (중)', stats['N4']!, const Color(0xFFf5a623))),
             const SizedBox(width: 8),
-            Expanded(
-              child: _buildStatCard(
-                'N5 (하)',
-                stats['N5']!,
-                const Color(0xFF43a047),
-              ),
-            ),
+            Expanded(child: _buildStatCard('N5 (하)', stats['N5']!, const Color(0xFF43a047))),
             const SizedBox(width: 8),
             const Expanded(child: SizedBox()),
           ],
@@ -475,8 +662,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(
-      String label, Map<String, dynamic> data, Color color) {
+  Widget _buildStatCard(String label, Map<String, dynamic> data, Color color) {
     final quizCount = data['quizCount'] as int;
     final avgRate = data['avgRate'] as double;
 

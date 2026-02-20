@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../providers/history_provider.dart';
+import '../providers/theme_provider.dart';
 import '../services/sentence_service.dart';
 import '../widgets/rolling_ticker.dart';
 import 'word_study_screen.dart';
@@ -168,12 +169,8 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       drawer: _buildDrawer(context),
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-          ),
+        decoration: BoxDecoration(
+          gradient: context.watch<ThemeProvider>().gradient,
         ),
         child: SafeArea(
           child: Stack(
@@ -1169,10 +1166,8 @@ class _HomeScreenState extends State<HomeScreen>
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF667eea), Color(0xFF764ba2)],
-                  ),
+                decoration: BoxDecoration(
+                  gradient: context.read<ThemeProvider>().gradient,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
