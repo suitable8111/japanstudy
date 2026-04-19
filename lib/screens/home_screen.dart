@@ -7,6 +7,7 @@ import '../providers/theme_provider.dart';
 import '../services/sentence_service.dart';
 import '../widgets/rolling_ticker.dart';
 import 'word_study_screen.dart';
+import 'word_writing_screen.dart';
 import 'sentence_study_screen.dart';
 import 'kana_study_screen.dart';
 import 'kana_writing_screen.dart';
@@ -208,14 +209,18 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ),
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+              LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(32, 56, 32, 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                       const Text(
-                        'JLPT 일기장',
+                        'JLPT STUDY',
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
@@ -269,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen>
                         title: '1단계: 단어 외우기',
                         subtitle: '레벨별 단어 학습 (20개)',
                         color: const Color(0xFF667eea),
-                        onTap: () => _showWordLevelDialog(context),
+                        onTap: () => _showWordModeDialog(context),
                       ),
                       const SizedBox(height: 16),
                       _buildMenuButton(
@@ -298,7 +303,10 @@ class _HomeScreenState extends State<HomeScreen>
                         color: const Color(0xFF43a047),
                         onTap: () => _showRadioTypeDialog(context),
                       ),
-                    ],
+                        ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -339,6 +347,60 @@ class _HomeScreenState extends State<HomeScreen>
               onTap: () {
                 Navigator.pop(ctx);
                 _showKanaModeDialog(context, 'katakana');
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.auto_awesome,
+              label: '함께 공부하기',
+              description: '같은 음절 별 히라가나+가타카나 나란히 써보기',
+              color: Colors.deepPurple,
+              onTap: () {
+                Navigator.pop(ctx);
+                _showKanaBothModeDialog(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showKanaBothModeDialog(BuildContext context) {
+    const color = Colors.deepPurple;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: const Text(
+          '히라가나 + 가타카나 학습 모드',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.edit,
+              label: '써보기',
+              description: '같은 음절 히라가나·가타카나 나란히 보며 써보기 (46음절)',
+              color: color,
+              onTap: () {
+                Navigator.pop(ctx);
+                _showWritingOrderDialog(context, 'both');
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.hearing,
+              label: '써보기 (발음만)',
+              description: '글자를 가리고 소리만 듣고 써보기',
+              color: color,
+              onTap: () {
+                Navigator.pop(ctx);
+                _showWritingOrderDialog(context, 'both', blindMode: true);
               },
             ),
           ],
@@ -409,10 +471,18 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  void _showWritingOrderDialog(BuildContext context, String kanaType, {bool blindMode = false}) {
+  void _showWritingOrderDialog(
+    BuildContext context,
+    String kanaType, {
+    bool blindMode = false,
+  }) {
+    final isBoth = kanaType == 'both';
     final isHiragana = kanaType == 'hiragana';
-    final color = isHiragana ? Colors.teal : Colors.orange;
-    final typeName = isHiragana ? '히라가나' : '가타카나';
+    final color = isBoth
+        ? Colors.deepPurple
+        : (isHiragana ? Colors.teal : Colors.orange);
+    final typeName = isBoth ? '히라가나 + 가타카나' : (isHiragana ? '히라가나' : '가타카나');
+    final countLabel = isBoth ? '46음절 (히라가나+가타카나 함께)' : '청음 46자';
 
     showDialog(
       context: context,
@@ -429,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen>
               ctx,
               icon: Icons.format_list_numbered,
               label: '순서대로 써보기',
-              description: '행 순서대로 청음 46자 연습',
+              description: '행 순서대로 $countLabel 연습',
               color: color,
               onTap: () {
                 Navigator.pop(ctx);
@@ -449,7 +519,7 @@ class _HomeScreenState extends State<HomeScreen>
               ctx,
               icon: Icons.shuffle,
               label: '랜덤으로 써보기',
-              description: '랜덤 순서로 청음 46자 연습',
+              description: '랜덤 순서로 $countLabel 연습',
               color: color,
               onTap: () {
                 Navigator.pop(ctx);
@@ -471,7 +541,45 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  void _showWordLevelDialog(BuildContext context) {
+  void _showWordModeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF2a2a4e),
+        title: const Text('1단계: 단어 외우기', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.menu_book,
+              label: '단어 공부하기',
+              description: '단어 카드를 넘기며 암기',
+              color: const Color(0xFF667eea),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showWordLevelDialog(context, mode: 'study');
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildQuizTypeOption(
+              ctx,
+              icon: Icons.draw,
+              label: '단어 써보기',
+              description: 'ML Kit으로 필기 인식 (한자 포함)',
+              color: const Color(0xFF43a047),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showWordLevelDialog(context, mode: 'write');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showWordLevelDialog(BuildContext context, {String mode = 'study'}) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -491,7 +599,11 @@ class _HomeScreenState extends State<HomeScreen>
                   Navigator.pop(ctx);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const WordStudyScreen()),
+                    MaterialPageRoute(
+                      builder: (_) => mode == 'write'
+                          ? const WordWritingScreen()
+                          : const WordStudyScreen(),
+                    ),
                   );
                 },
               ),
@@ -507,7 +619,9 @@ class _HomeScreenState extends State<HomeScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const WordStudyScreen(level: 'N5'),
+                      builder: (_) => mode == 'write'
+                          ? const WordWritingScreen(level: 'N5')
+                          : const WordStudyScreen(level: 'N5'),
                     ),
                   );
                 },
@@ -524,7 +638,9 @@ class _HomeScreenState extends State<HomeScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const WordStudyScreen(level: 'N4'),
+                      builder: (_) => mode == 'write'
+                          ? const WordWritingScreen(level: 'N4')
+                          : const WordStudyScreen(level: 'N4'),
                     ),
                   );
                 },
@@ -541,7 +657,9 @@ class _HomeScreenState extends State<HomeScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const WordStudyScreen(level: 'N3'),
+                      builder: (_) => mode == 'write'
+                          ? const WordWritingScreen(level: 'N3')
+                          : const WordStudyScreen(level: 'N3'),
                     ),
                   );
                 },
@@ -558,7 +676,9 @@ class _HomeScreenState extends State<HomeScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const WordStudyScreen(level: 'N2'),
+                      builder: (_) => mode == 'write'
+                          ? const WordWritingScreen(level: 'N2')
+                          : const WordStudyScreen(level: 'N2'),
                     ),
                   );
                 },
@@ -575,7 +695,9 @@ class _HomeScreenState extends State<HomeScreen>
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const WordStudyScreen(level: 'N1'),
+                      builder: (_) => mode == 'write'
+                          ? const WordWritingScreen(level: 'N1')
+                          : const WordStudyScreen(level: 'N1'),
                     ),
                   );
                 },
@@ -1315,7 +1437,7 @@ class _HomeScreenState extends State<HomeScreen>
             const Padding(
               padding: EdgeInsets.all(16),
               child: Text(
-                'JLPT 일기장 v1.0',
+                'JLPT STUDY v1.0',
                 style: TextStyle(color: Colors.white24, fontSize: 12),
               ),
             ),

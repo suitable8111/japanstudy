@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/quiz_provider.dart';
@@ -6,6 +7,7 @@ import '../providers/history_provider.dart';
 import '../providers/tts_settings_provider.dart';
 import '../models/study_record.dart';
 import '../services/firestore_service.dart';
+import '../services/ad_service.dart';
 
 class QuizScreen extends StatefulWidget {
   final String quizType; // 'word' or 'sentence'
@@ -25,6 +27,7 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   bool _statsSaved = false;
+  bool _adShown = false;
 
   @override
   void initState() {
@@ -102,6 +105,7 @@ class _QuizScreenState extends State<QuizScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const BannerAdWidget(),
       body: Consumer<QuizProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading) {
@@ -327,6 +331,14 @@ class _QuizScreenState extends State<QuizScreen> {
             ? (provider.correctCount / provider.totalCount * 100).round()
             : 0;
 
+    // 퀴즈 완료 시 전면 광고 표시 (최초 1회)
+    if (!_adShown) {
+      _adShown = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AdService.instance.showInterstitialAd();
+      });
+    }
+
     // 히스토리 저장 + 유저 통계 업데이트
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final historyProvider = context.read<HistoryProvider>();
@@ -431,7 +443,9 @@ class _QuizScreenState extends State<QuizScreen> {
             const SizedBox(height: 48),
             ElevatedButton.icon(
               onPressed: () {
+                AdService.instance.showInterstitialAd();
                 _statsSaved = false;
+                _adShown = false;
                 final quizCount = context.read<TtsSettingsProvider>().quizCount;
                 if (_isKanaQuiz) {
                   final kanaType = widget.quizType.replaceFirst('kana_', '');
@@ -461,6 +475,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () {
+                    AdService.instance.showInterstitialAd();
                     final wrongItems = provider.questions
                         .where((q) => !q.isCorrect)
                         .map((q) => StudyItem(
@@ -470,6 +485,7 @@ class _QuizScreenState extends State<QuizScreen> {
                             ))
                         .toList();
                     _statsSaved = false;
+                    _adShown = false;
                     provider.startQuizFromItems(wrongItems, widget.quizType);
                   },
                   icon: const Icon(Icons.assignment_late),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'package:provider/provider.dart';
 import '../providers/word_provider.dart';
 import '../providers/history_provider.dart';
@@ -53,6 +54,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const BannerAdWidget(),
       body: Consumer<WordProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading) {

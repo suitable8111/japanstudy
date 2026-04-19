@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'package:provider/provider.dart';
 import '../providers/radio_provider.dart';
+import '../services/ad_service.dart';
 
 class RadioScreen extends StatefulWidget {
   final String mode; // 'word' or 'sentence'
@@ -46,6 +48,7 @@ class _RadioScreenState extends State<RadioScreen> {
           elevation: 0,
           foregroundColor: Colors.white,
         ),
+        bottomNavigationBar: const BannerAdWidget(),
         body: Consumer<RadioProvider>(
           builder: (context, provider, _) {
             if (provider.isLoading) {
@@ -271,7 +274,10 @@ class _RadioScreenState extends State<RadioScreen> {
             ),
             const SizedBox(height: 48),
             ElevatedButton.icon(
-              onPressed: () => provider.startRadio(widget.mode, level: widget.level),
+              onPressed: () {
+                AdService.instance.showInterstitialAd();
+                provider.startRadio(widget.mode, level: widget.level);
+              },
               icon: const Icon(Icons.refresh),
               label: const Text('다시 듣기', style: TextStyle(fontSize: 16)),
               style: ElevatedButton.styleFrom(

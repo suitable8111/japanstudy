@@ -57,7 +57,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'JLPT 일기장',
+                    'JLPT STUDY',
                     style: TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,

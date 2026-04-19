@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'services/ad_service.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/word_provider.dart';
@@ -21,6 +23,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await MobileAds.instance.initialize();
+  AdService.instance.loadInterstitialAd();
 
   final ttsSettings = TtsSettingsProvider();
   await ttsSettings.loadSettings();
@@ -91,7 +95,7 @@ class JapanStudyApp extends StatelessWidget {
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, theme, _) => MaterialApp(
-          title: 'JLPT 일기장',
+          title: 'JLPT STUDY',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(

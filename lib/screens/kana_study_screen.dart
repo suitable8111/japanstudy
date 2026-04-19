@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'package:provider/provider.dart';
 import '../models/kana.dart';
 import '../providers/kana_provider.dart';
@@ -86,6 +87,7 @@ class _KanaStudyScreenState extends State<KanaStudyScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const BannerAdWidget(),
       body: Consumer<KanaProvider>(
         builder: (context, provider, _) {
           if (provider.isLoading) {
