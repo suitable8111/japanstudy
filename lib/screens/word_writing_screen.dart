@@ -6,6 +6,7 @@ import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_re
 import '../models/word.dart';
 import '../providers/word_provider.dart';
 import '../widgets/recognition_canvas.dart';
+import '../providers/tts_settings_provider.dart';
 
 class WordWritingScreen extends StatefulWidget {
   final String? level;
@@ -281,7 +282,7 @@ class _WordWritingScreenState extends State<WordWritingScreen> {
                   child: Column(
                     children: [
                       Text(
-                        word.korean,
+                        word.meaning(context.read<TtsSettingsProvider>().displayLanguage),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,

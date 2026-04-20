@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/banner_ad_widget.dart';
+import '../providers/tts_settings_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart'
     as mlkit;
@@ -381,19 +382,19 @@ class _KanaWritingScreenState extends State<KanaWritingScreen> {
                       _buildCharacterDisplay(),
                       const SizedBox(height: 4),
 
-                      // Korean + romanji
-                      if (widget.blindMode && !_revealed)
-                        Text(
-                          _kanaList[_currentIndex].korean,
-                          style: const TextStyle(
-                              fontSize: 18, color: Colors.white70),
-                        )
-                      else
-                        Text(
-                          '${_kanaList[_currentIndex].korean} (${_kanaList[_currentIndex].reading})',
-                          style: const TextStyle(
-                              fontSize: 18, color: Colors.white70),
-                        ),
+                      // 번역 + 로마자
+                      Builder(builder: (ctx) {
+                        final lang = ctx.read<TtsSettingsProvider>().displayLanguage;
+                        final kana = _kanaList[_currentIndex];
+                        final m = kana.meaning(lang);
+                        if (widget.blindMode && !_revealed) {
+                          return Text(m, style: const TextStyle(fontSize: 18, color: Colors.white70));
+                        }
+                        return Text(
+                          lang == 'en' ? m : '$m (${kana.reading})',
+                          style: const TextStyle(fontSize: 18, color: Colors.white70),
+                        );
+                      }),
                       const SizedBox(height: 12),
 
                       // Canvas

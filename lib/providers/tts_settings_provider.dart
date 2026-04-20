@@ -12,6 +12,9 @@ class TtsSettingsProvider extends ChangeNotifier {
   String? _selectedVoiceName;
   List<Map<String, String>> _availableVoices = [];
 
+  // 언어 설정
+  String _displayLanguage = 'ko'; // 'ko' | 'en'
+
   // 퀴즈 설정
   int _quizCount = 20;
   bool _quizAutoTts = true;
@@ -27,6 +30,7 @@ class TtsSettingsProvider extends ChangeNotifier {
   String get voiceGender => _voiceGender;
   String? get selectedVoiceName => _selectedVoiceName;
   List<Map<String, String>> get availableVoices => _availableVoices;
+  String get displayLanguage => _displayLanguage;
   int get quizCount => _quizCount;
   bool get quizAutoTts => _quizAutoTts;
   String get apiKey => _apiKey;
@@ -39,6 +43,7 @@ class TtsSettingsProvider extends ChangeNotifier {
     _pitch = prefs.getDouble('tts_pitch') ?? 1.05;
     _voiceGender = prefs.getString('tts_voice_gender') ?? 'female';
     _selectedVoiceName = prefs.getString('tts_voice_name');
+    _displayLanguage = prefs.getString('display_language') ?? 'ko';
     _quizCount = prefs.getInt('quiz_count') ?? 20;
     _quizAutoTts = prefs.getBool('quiz_auto_tts') ?? true;
     _apiKey = prefs.getString('tts_api_key') ?? '';
@@ -97,6 +102,13 @@ class TtsSettingsProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('tts_cloud_voice', name);
+  }
+
+  Future<void> setDisplayLanguage(String lang) async {
+    _displayLanguage = lang;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('display_language', lang);
   }
 
   Future<void> setQuizCount(int count) async {

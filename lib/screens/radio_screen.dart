@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/banner_ad_widget.dart';
+import '../providers/tts_settings_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/radio_provider.dart';
 import '../services/ad_service.dart';
@@ -130,7 +131,11 @@ class _RadioScreenState extends State<RadioScreen> {
           const SizedBox(height: 24),
           // 한국어 텍스트
           Text(
-            item['korean']!,
+            (() {
+                final lang = context.read<TtsSettingsProvider>().displayLanguage;
+                final eng = item['english'] ?? '';
+                return (lang == 'en' && eng.isNotEmpty) ? eng : item['korean']!;
+              })(),
             style: const TextStyle(
               fontSize: 22,
               color: Colors.white70,

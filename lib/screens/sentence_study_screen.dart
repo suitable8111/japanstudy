@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/banner_ad_widget.dart';
+import '../providers/tts_settings_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/sentence_provider.dart';
 import '../providers/history_provider.dart';
@@ -201,7 +202,7 @@ class _SentenceStudyScreenState extends State<SentenceStudyScreen> {
                     Container(width: 60, height: 2, color: Colors.white24),
                     const SizedBox(height: 20),
                     Text(
-                      provider.showAnswer ? sentence.korean : '',
+                      provider.showAnswer ? sentence.meaning(context.read<TtsSettingsProvider>().displayLanguage) : '',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w600,

@@ -69,6 +69,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
+              // 번역 언어
+              _buildSectionTitle('번역 언어'),
+              const SizedBox(height: 4),
+              const Text(
+                '단어/문장 의미 표시 언어 (영어 데이터 없으면 한국어로 표시)',
+                style: TextStyle(color: Colors.white54, fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  _buildLangButton(context, settings, '한국어', 'ko'),
+                  const SizedBox(width: 12),
+                  _buildLangButton(context, settings, 'English', 'en'),
+                ],
+              ),
+              const SizedBox(height: 28),
+              const Divider(color: Colors.white12),
+              const SizedBox(height: 20),
+
               // 앱 테마
               _buildSectionTitle('앱 테마'),
               const SizedBox(height: 4),
@@ -541,6 +560,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   // ===== 공통 위젯들 =====
+
+  Widget _buildLangButton(BuildContext context, TtsSettingsProvider settings, String label, String lang) {
+    final isSelected = settings.displayLanguage == lang;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => settings.setDisplayLanguage(lang),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFF667eea).withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? const Color(0xFF667eea) : Colors.white24,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              color: isSelected ? Colors.white : Colors.white54,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildSectionTitle(String title) {
     return Text(

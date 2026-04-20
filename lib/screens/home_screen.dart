@@ -176,39 +176,6 @@ class _HomeScreenState extends State<HomeScreen>
         child: SafeArea(
           child: Stack(
             children: [
-              // 메뉴 버튼 (왼쪽)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: Builder(
-                  builder: (ctx) => IconButton(
-                    onPressed: () => Scaffold.of(ctx).openDrawer(),
-                    icon: const Icon(
-                      Icons.menu,
-                      color: Colors.white70,
-                      size: 28,
-                    ),
-                  ),
-                ),
-              ),
-              // 설정 버튼 (오른쪽)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.settings,
-                    color: Colors.white70,
-                    size: 28,
-                  ),
-                ),
-              ),
               LayoutBuilder(
                 builder: (context, constraints) => SingleChildScrollView(
                   child: ConstrainedBox(
@@ -308,6 +275,29 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                     ),
                   ),
+                ),
+              ),
+              // 메뉴 버튼 (왼쪽) — ScrollView 위에 렌더링
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Builder(
+                  builder: (ctx) => IconButton(
+                    onPressed: () => Scaffold.of(ctx).openDrawer(),
+                    icon: const Icon(Icons.menu, color: Colors.white70, size: 28),
+                  ),
+                ),
+              ),
+              // 설정 버튼 (오른쪽)
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                  ),
+                  icon: const Icon(Icons.settings, color: Colors.white70, size: 28),
                 ),
               ),
             ],

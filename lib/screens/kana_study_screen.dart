@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/banner_ad_widget.dart';
+import '../providers/tts_settings_provider.dart';
 import 'package:provider/provider.dart';
 import '../models/kana.dart';
 import '../providers/kana_provider.dart';
@@ -180,10 +181,11 @@ class _KanaStudyScreenState extends State<KanaStudyScreen> {
         builder: (context, constraints) {
           final labelWidth = 48.0;
           final availableWidth = constraints.maxWidth - labelWidth;
-          // 5열 기준 타일 크기 계산 (간격 포함)
           final spacing = 6.0;
-          final tileWidth = (availableWidth - spacing * 4) / 5;
-          final tileHeight = tileWidth * 1.14; // 비율 유지
+          // わ행/ワ행은 ん 포함 6칸, 나머지는 5칸
+          final colCount = _isWaRow(rowLabel) ? 6 : 5;
+          final tileWidth = (availableWidth - spacing * (colCount - 1)) / colCount;
+          final tileHeight = tileWidth * 1.2; // 여유 높이
 
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,42 +286,45 @@ class _KanaStudyScreenState extends State<KanaStudyScreen> {
                 : Colors.white.withValues(alpha: 0.1),
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              kana.japanese,
-              style: TextStyle(
-                fontSize: japaneseSize,
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (isTapped) ...[
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
               Text(
-                kana.korean,
+                kana.japanese,
                 style: TextStyle(
-                  fontSize: koreanSize,
-                  fontWeight: FontWeight.w600,
-                  color: _themeColor.shade200,
+                  fontSize: japaneseSize,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              Text(
-                kana.reading,
-                style: TextStyle(
-                  fontSize: readingSize,
-                  color: Colors.white.withValues(alpha: 0.5),
+              if (isTapped) ...[
+                Text(
+                  kana.meaning(context.read<TtsSettingsProvider>().displayLanguage),
+                  style: TextStyle(
+                    fontSize: koreanSize,
+                    fontWeight: FontWeight.w600,
+                    color: _themeColor.shade200,
+                  ),
                 ),
-              ),
-            ] else
-              Text(
-                kana.reading,
-                style: TextStyle(
-                  fontSize: readingSize,
-                  color: Colors.white.withValues(alpha: 0.45),
+                Text(
+                  kana.reading,
+                  style: TextStyle(
+                    fontSize: readingSize,
+                    color: Colors.white.withValues(alpha: 0.5),
+                  ),
                 ),
-              ),
-          ],
+              ] else
+                Text(
+                  kana.reading,
+                  style: TextStyle(
+                    fontSize: readingSize,
+                    color: Colors.white.withValues(alpha: 0.45),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

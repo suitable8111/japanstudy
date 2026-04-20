@@ -112,8 +112,13 @@ class TtsService {
 
   Future<void> speakKorean(String text) async {
     await init();
-    // 한국어는 항상 기기 TTS 사용
     await _flutterTts.setLanguage('ko-KR');
+    await _flutterTts.speak(text);
+  }
+
+  Future<void> speakEnglish(String text) async {
+    await init();
+    await _flutterTts.setLanguage('en-US');
     await _flutterTts.speak(text);
   }
 

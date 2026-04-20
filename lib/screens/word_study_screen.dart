@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/banner_ad_widget.dart';
+import '../providers/tts_settings_provider.dart';
 import 'package:provider/provider.dart';
 import '../providers/word_provider.dart';
 import '../providers/history_provider.dart';
@@ -169,7 +170,7 @@ class _WordStudyScreenState extends State<WordStudyScreen> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      provider.showAnswer ? word.korean : '',
+                      provider.showAnswer ? word.meaning(context.read<TtsSettingsProvider>().displayLanguage) : '',
                       style: const TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.w600,

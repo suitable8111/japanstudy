@@ -38,10 +38,13 @@ class QuizProvider extends ChangeNotifier {
 
   bool _quizAutoTts = true;
   bool get quizAutoTts => _quizAutoTts;
+  String _displayLanguage = 'ko';
+  String get displayLanguage => _displayLanguage;
 
   void updateTtsSettings(TtsSettingsProvider settings) {
     _ttsService.applySettings(settings);
     _quizAutoTts = settings.quizAutoTts;
+    _displayLanguage = settings.displayLanguage;
   }
 
   String _quizType = 'word'; // 'word' or 'sentence'
@@ -107,20 +110,21 @@ class QuizProvider extends ChangeNotifier {
     final quizWords = selected.take(count.clamp(0, selected.length)).toList();
 
     for (final word in quizWords) {
+      final correct = word.meaning(_displayLanguage);
       final wrongAnswers = allWords
-          .where((w) => w.korean != word.korean)
-          .map((w) => w.korean)
+          .where((w) => w.meaning(_displayLanguage) != correct)
+          .map((w) => w.meaning(_displayLanguage))
           .toSet()
           .toList()
         ..shuffle(random);
 
-      final choices = [word.korean, ...wrongAnswers.take(3)];
+      final choices = [correct, ...wrongAnswers.take(3)];
       choices.shuffle(random);
 
       _questions.add(QuizQuestion(
         japanese: word.japanese,
         reading: word.reading,
-        correctAnswer: word.korean,
+        correctAnswer: correct,
         choices: choices,
       ));
     }
@@ -138,20 +142,21 @@ class QuizProvider extends ChangeNotifier {
         selected.take(count.clamp(0, selected.length)).toList();
 
     for (final sentence in quizSentences) {
+      final correct = sentence.meaning(_displayLanguage);
       final wrongAnswers = allSentences
-          .where((s) => s.korean != sentence.korean)
-          .map((s) => s.korean)
+          .where((s) => s.meaning(_displayLanguage) != correct)
+          .map((s) => s.meaning(_displayLanguage))
           .toSet()
           .toList()
         ..shuffle(random);
 
-      final choices = [sentence.korean, ...wrongAnswers.take(3)];
+      final choices = [correct, ...wrongAnswers.take(3)];
       choices.shuffle(random);
 
       _questions.add(QuizQuestion(
         japanese: sentence.japanese,
         reading: sentence.reading,
-        correctAnswer: sentence.korean,
+        correctAnswer: correct,
         choices: choices,
       ));
     }
@@ -169,20 +174,21 @@ class QuizProvider extends ChangeNotifier {
         primaryCount: primaryCount, otherCount: otherCount);
 
     for (final word in quizWords) {
+      final correct = word.meaning(_displayLanguage);
       final wrongAnswers = allWords
-          .where((w) => w.korean != word.korean)
-          .map((w) => w.korean)
+          .where((w) => w.meaning(_displayLanguage) != correct)
+          .map((w) => w.meaning(_displayLanguage))
           .toSet()
           .toList()
         ..shuffle(random);
 
-      final choices = [word.korean, ...wrongAnswers.take(3)];
+      final choices = [correct, ...wrongAnswers.take(3)];
       choices.shuffle(random);
 
       _questions.add(QuizQuestion(
         japanese: word.japanese,
         reading: word.reading,
-        correctAnswer: word.korean,
+        correctAnswer: correct,
         choices: choices,
       ));
     }
@@ -200,20 +206,21 @@ class QuizProvider extends ChangeNotifier {
         primaryCount: primaryCount, otherCount: otherCount);
 
     for (final sentence in quizSentences) {
+      final correct = sentence.meaning(_displayLanguage);
       final wrongAnswers = allSentences
-          .where((s) => s.korean != sentence.korean)
-          .map((s) => s.korean)
+          .where((s) => s.meaning(_displayLanguage) != correct)
+          .map((s) => s.meaning(_displayLanguage))
           .toSet()
           .toList()
         ..shuffle(random);
 
-      final choices = [sentence.korean, ...wrongAnswers.take(3)];
+      final choices = [correct, ...wrongAnswers.take(3)];
       choices.shuffle(random);
 
       _questions.add(QuizQuestion(
         japanese: sentence.japanese,
         reading: sentence.reading,
-        correctAnswer: sentence.korean,
+        correctAnswer: correct,
         choices: choices,
       ));
     }
@@ -241,20 +248,21 @@ class QuizProvider extends ChangeNotifier {
     final quizKana = selected.take(count.clamp(0, selected.length)).toList();
 
     for (final kana in quizKana) {
+      final correct = kana.meaning(_displayLanguage);
       final wrongAnswers = allKana
-          .where((k) => k.korean != kana.korean)
-          .map((k) => k.korean)
+          .where((k) => k.meaning(_displayLanguage) != correct)
+          .map((k) => k.meaning(_displayLanguage))
           .toSet()
           .toList()
         ..shuffle(random);
 
-      final choices = <String>[kana.korean, ...wrongAnswers.take(3)];
+      final choices = <String>[correct, ...wrongAnswers.take(3)];
       choices.shuffle(random);
 
       _questions.add(QuizQuestion(
         japanese: kana.japanese,
         reading: kana.reading,
-        correctAnswer: kana.korean,
+        correctAnswer: correct,
         choices: choices,
       ));
     }

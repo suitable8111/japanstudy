@@ -26,6 +26,9 @@ class Kana {
     );
   }
 
+  // 영어 모드에서는 로마자(reading) 표시
+  String meaning(String lang) => lang == 'en' ? reading : korean;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

@@ -10,8 +10,11 @@ class RadioProvider extends ChangeNotifier {
   final SentenceService _sentenceService = SentenceService();
   final TtsService _ttsService = TtsService();
 
+  String _displayLanguage = 'ko';
+
   void updateTtsSettings(TtsSettingsProvider settings) {
     _ttsService.applySettings(settings);
+    _displayLanguage = settings.displayLanguage;
   }
 
   // 아이템: {japanese, reading, korean}
@@ -62,6 +65,7 @@ class RadioProvider extends ChangeNotifier {
                 'japanese': w.japanese,
                 'reading': w.reading,
                 'korean': w.korean,
+                'english': w.english,
               })
           .toList();
     } else {
@@ -74,6 +78,7 @@ class RadioProvider extends ChangeNotifier {
                 'japanese': s.japanese,
                 'reading': s.reading,
                 'korean': s.korean,
+                'english': s.english,
               })
           .toList();
     }
@@ -104,12 +109,19 @@ class RadioProvider extends ChangeNotifier {
       await _delayWithCheck(2000);
       if (_stopRequested) return;
 
-      // Step 1: 한국어
+      // Step 1: 번역 (한국어 또는 영어)
       _currentStep = 1;
       notifyListeners();
       await _checkPause();
       if (_stopRequested) return;
-      await _ttsService.speakKorean(item['korean']!);
+      final translation = (_displayLanguage == 'en' && (item['english'] ?? '').isNotEmpty)
+          ? item['english']!
+          : item['korean']!;
+      if (_displayLanguage == 'en' && (item['english'] ?? '').isNotEmpty) {
+        await _ttsService.speakEnglish(translation);
+      } else {
+        await _ttsService.speakKorean(translation);
+      }
       await _delayWithCheck(2000);
       if (_stopRequested) return;
 
