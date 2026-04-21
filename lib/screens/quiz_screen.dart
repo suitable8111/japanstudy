@@ -134,7 +134,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget _buildQuizCard(BuildContext context, QuizProvider provider) {
     final question = provider.currentQuestion!;
 
-    return Padding(
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
@@ -168,12 +168,12 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
             ],
           ),
-          const Spacer(),
+          const SizedBox(height: 32),
           // Japanese text
           Text(
             question.japanese,
             style: TextStyle(
-              fontSize: _isKanaQuiz ? 80 : (widget.quizType == 'word' ? 48 : 28),
+              fontSize: _isKanaQuiz ? 80 : (widget.quizType == 'word' ? 48 : 24),
               fontWeight: FontWeight.bold,
               color: Colors.white,
               height: 1.5,
@@ -185,11 +185,11 @@ class _QuizScreenState extends State<QuizScreen> {
             // Reading (hidden for kana quiz)
             Text(
               question.reading,
-              style: const TextStyle(fontSize: 18, color: Colors.white60),
+              style: const TextStyle(fontSize: 16, color: Colors.white60),
               textAlign: TextAlign.center,
             ),
           ],
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           // Replay TTS (hidden for kana quiz)
           if (!_isKanaQuiz)
             IconButton(
@@ -201,7 +201,7 @@ class _QuizScreenState extends State<QuizScreen> {
               icon: const Icon(Icons.volume_up, size: 28),
               color: Colors.white54,
             ),
-          const Spacer(),
+          const SizedBox(height: 16),
           // 4 choices
           ...List.generate(4, (index) {
             final isSelected = question.selectedIndex == index;

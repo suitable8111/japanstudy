@@ -21,7 +21,9 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   Future<void> _loadAd() async {
     final width = MediaQuery.of(context).size.width.truncate();
-    final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width);
+    final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+      width,
+    );
     if (size == null || !mounted) return;
 
     final ad = BannerAd(
@@ -50,6 +52,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: remove before release
+    //return const SizedBox.shrink();
     if (_adSize == null || _bannerAd == null) return const SizedBox.shrink();
     return SizedBox(
       width: _adSize!.width.toDouble(),
