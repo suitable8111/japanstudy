@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_strings.dart';
 import '../providers/auth_provider.dart';
 import '../providers/ranking_provider.dart';
 
@@ -14,18 +15,12 @@ class _RankingScreenState extends State<RankingScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  static const _tabs = [
-    {'label': '최상 (N1)', 'difficulty': 'N1'},
-    {'label': '상상 (N2)', 'difficulty': 'N2'},
-    {'label': '상 (N3)', 'difficulty': 'N3'},
-    {'label': '중 (N4)', 'difficulty': 'N4'},
-    {'label': '하 (N5)', 'difficulty': 'N5'},
-  ];
+  static const _difficulties = ['N1', 'N2', 'N3', 'N4', 'N5'];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController = TabController(length: _difficulties.length, vsync: this);
     _tabController.addListener(_onTabChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -35,7 +30,7 @@ class _RankingScreenState extends State<RankingScreen>
 
   void _onTabChanged() {
     if (_tabController.indexIsChanging) return;
-    final difficulty = _tabs[_tabController.index]['difficulty']!;
+    final difficulty = _difficulties[_tabController.index];
     context.read<RankingProvider>().changeDifficulty(difficulty);
   }
 
@@ -51,7 +46,7 @@ class _RankingScreenState extends State<RankingScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: const Text('랭킹'),
+        title: Text(AppStrings.of(context).rankingTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -61,7 +56,13 @@ class _RankingScreenState extends State<RankingScreen>
           indicatorColor: const Color(0xFFe96743),
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white54,
-          tabs: _tabs.map((t) => Tab(text: t['label'])).toList(),
+          tabs: [
+            Tab(text: AppStrings.of(context).n1Label),
+            Tab(text: AppStrings.of(context).n2Label),
+            Tab(text: AppStrings.of(context).n3Label),
+            Tab(text: AppStrings.of(context).n4Label),
+            Tab(text: AppStrings.of(context).n5Label),
+          ],
         ),
       ),
       body: Consumer<RankingProvider>(
@@ -73,10 +74,10 @@ class _RankingScreenState extends State<RankingScreen>
           }
 
           if (provider.rankings.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                '아직 퀴즈 기록이 없습니다.',
-                style: TextStyle(color: Colors.white54, fontSize: 16),
+                AppStrings.of(context).rankingNoData,
+                style: const TextStyle(color: Colors.white54, fontSize: 16),
               ),
             );
           }
@@ -197,7 +198,7 @@ class _RankingScreenState extends State<RankingScreen>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '퀴즈 $quizCount회',
+                      AppStrings.of(context).rankingQuizCount(quizCount),
                       style:
                           const TextStyle(fontSize: 13, color: Colors.white54),
                     ),
@@ -220,9 +221,9 @@ class _RankingScreenState extends State<RankingScreen>
                               : Colors.redAccent,
                     ),
                   ),
-                  const Text(
-                    '최고점수',
-                    style: TextStyle(fontSize: 11, color: Colors.white38),
+                  Text(
+                    AppStrings.of(context).rankingBestScore,
+                    style: const TextStyle(fontSize: 11, color: Colors.white38),
                   ),
                 ],
               ),

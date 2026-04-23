@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_strings.dart';
 import '../providers/history_provider.dart';
 import '../models/study_record.dart';
 import 'history_detail_screen.dart';
@@ -25,7 +26,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: const Text('공부한 내역'),
+        title: Text(AppStrings.of(context).historyTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -50,21 +51,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
           }
 
           if (provider.records.isEmpty) {
-            return const Center(
+            final s = AppStrings.of(context);
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, color: Colors.white24, size: 64),
-                  SizedBox(height: 16),
-                  Text(
-                    '아직 공부한 내역이 없습니다',
-                    style: TextStyle(color: Colors.white54, fontSize: 16),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    '학습이나 퀴즈를 완료하면 여기에 기록됩니다',
-                    style: TextStyle(color: Colors.white38, fontSize: 14),
-                  ),
+                  const Icon(Icons.history, color: Colors.white24, size: 64),
+                  const SizedBox(height: 16),
+                  Text(s.historyEmpty, style: const TextStyle(color: Colors.white54, fontSize: 16)),
+                  const SizedBox(height: 8),
+                  Text(s.historyEmptyDesc, style: const TextStyle(color: Colors.white38, fontSize: 14)),
                 ],
               ),
             );
@@ -199,27 +195,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   void _showClearDialog(BuildContext context, HistoryProvider provider) {
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
-        title: const Text('내역 삭제', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          '모든 공부 내역을 삭제하시겠습니까?',
-          style: TextStyle(color: Colors.white70),
-        ),
+        title: Text(s.historyDelete, style: const TextStyle(color: Colors.white)),
+        content: Text(s.historyDeleteConfirm, style: const TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소'),
+            child: Text(s.historyCancel),
           ),
           TextButton(
             onPressed: () {
               provider.clearHistory();
               Navigator.pop(ctx);
             },
-            child:
-                const Text('삭제', style: TextStyle(color: Colors.redAccent)),
+            child: Text(s.historyConfirmDelete, style: const TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),

@@ -31,8 +31,11 @@ class LevelTestProvider extends ChangeNotifier {
   final TtsService _ttsService = TtsService();
   TtsService get ttsService => _ttsService;
 
+  String _displayLanguage = 'ko';
+
   void updateTtsSettings(TtsSettingsProvider settings) {
     _ttsService.applySettings(settings);
+    _displayLanguage = settings.displayLanguage;
   }
 
   static const List<String> _levels = ['N5', 'N4', 'N3', 'N2', 'N1'];
@@ -98,20 +101,22 @@ class LevelTestProvider extends ChangeNotifier {
     levelWords.shuffle(random);
     final word = levelWords.first;
 
+    final correctMeaning = word.meaning(_displayLanguage);
+
     final wrongAnswers = _allWords
-        .where((w) => w.korean != word.korean)
-        .map((w) => w.korean)
+        .where((w) => w.meaning(_displayLanguage) != correctMeaning)
+        .map((w) => w.meaning(_displayLanguage))
         .toSet()
         .toList()
       ..shuffle(random);
 
-    final choices = [word.korean, ...wrongAnswers.take(3)];
+    final choices = [correctMeaning, ...wrongAnswers.take(3)];
     choices.shuffle(random);
 
     _questions.add(LevelTestQuestion(
       japanese: word.japanese,
       reading: word.reading,
-      correctAnswer: word.korean,
+      correctAnswer: correctMeaning,
       choices: choices,
       level: _currentLevel,
     ));

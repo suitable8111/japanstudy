@@ -14,7 +14,7 @@ class AdService {
           : 'ca-app-pub-3940256099942544/2934735716';
     }
     return Platform.isAndroid
-        ? 'ca-app-pub-9185470230877087/4018434962' // 실제 Android 배너 ID
+        ? 'ca-app-pub-9185470230877087/3335733677' // 실제 Android 배너 ID
         : 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX'; // 실제 iOS 배너 ID
   }
 
@@ -25,7 +25,7 @@ class AdService {
           : 'ca-app-pub-3940256099942544/4411468910';
     }
     return Platform.isAndroid
-        ? 'ca-app-pub-9185470230877087/1441419266' // 실제 Android 전면 ID
+        ? 'ca-app-pub-9185470230877087/7424834102' // 실제 Android 전면 ID
         : 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX'; // 실제 iOS 전면 ID
   }
 

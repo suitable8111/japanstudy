@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_strings.dart';
 import '../providers/history_provider.dart';
 
 class StatsScreen extends StatefulWidget {
@@ -22,7 +23,7 @@ class _StatsScreenState extends State<StatsScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1a1a2e),
         foregroundColor: Colors.white,
-        title: const Text('학습 통계'),
+        title: Text(AppStrings.of(context).statsTitle),
         centerTitle: true,
       ),
       body: Consumer<HistoryProvider>(
@@ -40,11 +41,11 @@ class _StatsScreenState extends State<StatsScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildToggleButton('주간', _isWeekly, () {
+                    _buildToggleButton(AppStrings.of(context).statsWeekly, _isWeekly, () {
                       setState(() => _isWeekly = true);
                     }),
                     const SizedBox(width: 12),
-                    _buildToggleButton('월간', !_isWeekly, () {
+                    _buildToggleButton(AppStrings.of(context).statsMonthly, !_isWeekly, () {
                       setState(() => _isWeekly = false);
                     }),
                   ],
@@ -103,9 +104,10 @@ class _StatsScreenState extends State<StatsScreen> {
         e.value['word']! > 0 ||
         e.value['sentence']! > 0 ||
         e.value['quiz']! > 0);
+    final s = AppStrings.of(context);
 
     return _chartCard(
-      title: '일별 학습량',
+      title: s.statsDailyChart,
       child: hasData
           ? SizedBox(
               height: 220,
@@ -123,7 +125,7 @@ class _StatsScreenState extends State<StatsScreen> {
                         final s = entry.value['sentence']!;
                         final q = entry.value['quiz']!;
                         return BarTooltipItem(
-                          '$date\n단어: $w  문장: $s  퀴즈: $q',
+                          '$date\n${AppStrings.of(context).profileWord}: $w  ${AppStrings.of(context).profileSentence}: $s  ${AppStrings.of(context).profileQuiz}: $q',
                           const TextStyle(
                               color: Colors.white, fontSize: 12),
                         );
@@ -212,11 +214,11 @@ class _StatsScreenState extends State<StatsScreen> {
                 ),
               ),
             )
-          : _emptyState('학습 기록이 없습니다'),
-      legend: const [
-        _LegendItem(color: Color(0xFF667eea), label: '단어'),
-        _LegendItem(color: Color(0xFF764ba2), label: '문장'),
-        _LegendItem(color: Color(0xFFe96743), label: '퀴즈'),
+          : _emptyState(s.statsNoStudy),
+      legend: [
+        _LegendItem(color: const Color(0xFF667eea), label: s.profileWord),
+        _LegendItem(color: const Color(0xFF764ba2), label: s.profileSentence),
+        _LegendItem(color: const Color(0xFFe96743), label: s.profileQuiz),
       ],
     );
   }
@@ -235,7 +237,7 @@ class _StatsScreenState extends State<StatsScreen> {
   String _bottomLabel(String dateStr) {
     if (_isWeekly) {
       final date = DateTime.parse(dateStr);
-      const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+      final weekdays = AppStrings.of(context).weekdays;
       return weekdays[date.weekday - 1];
     } else {
       return dateStr.substring(8); // DD
@@ -246,9 +248,9 @@ class _StatsScreenState extends State<StatsScreen> {
 
   Widget _buildQuizAccuracyChart(List<Map<String, dynamic>> trend) {
     return _chartCard(
-      title: '퀴즈 정답률 추이',
+      title: AppStrings.of(context).statsAccuracyChart,
       child: trend.isEmpty
-          ? _emptyState('퀴즈 기록이 없습니다')
+          ? _emptyState(AppStrings.of(context).statsNoQuiz)
           : SizedBox(
               height: 220,
               child: LineChart(
@@ -368,7 +370,7 @@ class _StatsScreenState extends State<StatsScreen> {
     ];
 
     return _chartCard(
-      title: '난이도별 퀴즈 성적',
+      title: AppStrings.of(context).statsLevelStats,
       child: hasData
           ? SizedBox(
               height: 220,
@@ -461,7 +463,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 ),
               ),
             )
-          : _emptyState('퀴즈 기록이 없습니다'),
+          : _emptyState(AppStrings.of(context).statsNoQuiz),
     );
   }
 

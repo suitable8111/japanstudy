@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/app_strings.dart';
 import '../providers/auth_provider.dart';
+import '../providers/tts_settings_provider.dart';
 import '../providers/history_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/sentence_service.dart';
@@ -71,14 +73,9 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showStreakMilestoneDialog(int streak) {
-    final messages = {
-      3: '좋은 시작이에요! 꾸준히 해봐요!',
-      7: '일주일 연속! 대단해요!',
-      14: '2주 연속 학습! 습관이 되어가고 있어요!',
-      30: '한 달 연속! 정말 대단합니다!',
-      50: '50일 돌파! 일본어 마스터에 가까워지고 있어요!',
-      100: '100일 달성! 당신은 진정한 학습왕입니다!',
-    };
+    final s = AppStrings.get(
+      context.read<TtsSettingsProvider>().displayLanguage,
+    );
 
     showDialog(
       context: context,
@@ -95,9 +92,9 @@ class _HomeScreenState extends State<HomeScreen>
               size: 72,
             ),
             const SizedBox(height: 16),
-            const Text(
-              '축하합니다!',
-              style: TextStyle(
+            Text(
+              s.streakCongrats,
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -105,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              '$streak일 연속 학습 달성!',
+              s.streakAchieved(streak),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -114,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             const SizedBox(height: 12),
             Text(
-              messages[streak] ?? '대단해요! 계속 화이팅!',
+              s.streakMessages[streak] ?? '대단해요! 계속 화이팅!',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 15, color: Colors.white70),
             ),
@@ -124,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen>
           Center(
             child: TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('확인', style: TextStyle(fontSize: 16)),
+              child: Text(s.streakConfirm, style: const TextStyle(fontSize: 16)),
             ),
           ),
         ],
@@ -141,7 +138,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildStreakWidget(int streak) {
     final color = _getStreakColor(streak);
-    final text = streak == 0 ? '오늘 첫 학습을 시작해보세요!' : '$streak일 연속 학습!';
+    final s = AppStrings.of(context);
+    final text = streak == 0 ? s.streakStart : s.streakDays(streak);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -195,9 +193,9 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
                       const SizedBox(height: 4),
-                      const Text(
-                        '일본어 학습',
-                        style: TextStyle(fontSize: 16, color: Colors.white70),
+                      Text(
+                        AppStrings.of(context).appSubtitle,
+                        style: const TextStyle(fontSize: 16, color: Colors.white70),
                       ),
                       const SizedBox(height: 16),
                       Consumer<HistoryProvider>(
@@ -211,13 +209,14 @@ class _HomeScreenState extends State<HomeScreen>
                       const SizedBox(height: 8),
                       Consumer<HistoryProvider>(
                         builder: (context, history, _) {
+                          final s = AppStrings.of(context);
                           final items = [
-                            '오늘 학습: ${history.todayStudyCount}회',
-                            '누적 학습: ${history.coreStudyCount}회',
-                            '오늘 퀴즈: ${history.todayQuizCount}회',
-                            '누적 퀴즈: ${history.coreQuizCount}회',
-                            '퀴즈 정답률: ${history.overallQuizAccuracy.toStringAsFixed(1)}%',
-                            '오답 노트: ${history.wrongAnswerCount}개',
+                            '${s.tickerTodayStudy}: ${history.todayStudyCount}',
+                            '${s.tickerTotalStudy}: ${history.coreStudyCount}',
+                            '${s.tickerTodayQuiz}: ${history.todayQuizCount}',
+                            '${s.tickerTotalQuiz}: ${history.coreQuizCount}',
+                            '${s.tickerAccuracy}: ${history.overallQuizAccuracy.toStringAsFixed(1)}%',
+                            '${s.tickerWrongNote}: ${history.wrongAnswerCount}',
                           ];
                           return ClipRRect(
                             borderRadius: BorderRadius.circular(8),
@@ -226,50 +225,57 @@ class _HomeScreenState extends State<HomeScreen>
                         },
                       ),
                       const SizedBox(height: 16),
-                      _buildMenuButton(
-                        context,
-                        icon: Icons.abc,
-                        title: '0단계: 음절 공부하기',
-                        subtitle: '히라가나 / 가타카나 학습',
-                        color: Colors.teal,
-                        onTap: () => _showKanaTypeDialog(context),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildMenuButton(
-                        context,
-                        icon: Icons.text_fields,
-                        title: '1단계: 단어 외우기',
-                        subtitle: '레벨별 단어 학습 (20개)',
-                        color: const Color(0xFF667eea),
-                        onTap: () => _showWordModeDialog(context),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildMenuButton(
-                        context,
-                        icon: Icons.article,
-                        title: '2단계: 문장 외우기',
-                        subtitle: '레벨/카테고리별 문장 학습 (20개)',
-                        color: const Color(0xFF764ba2),
-                        onTap: () => _showSentenceCategoryDialog(context),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildMenuButton(
-                        context,
-                        icon: Icons.quiz,
-                        title: '3단계: 단어/문장 퀴즈',
-                        subtitle: '4지선다 (단어/문장)',
-                        color: const Color(0xFFe96743),
-                        onTap: () => _showQuizTypeDialog(context),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildMenuButton(
-                        context,
-                        icon: Icons.radio,
-                        title: '4단계: 라디오 듣기',
-                        subtitle: '자동 반복 재생 (단어/문장)',
-                        color: const Color(0xFF43a047),
-                        onTap: () => _showRadioTypeDialog(context),
-                      ),
+                      Builder(builder: (context) {
+                        final s = AppStrings.of(context);
+                        return Column(
+                          children: [
+                            _buildMenuButton(
+                              context,
+                              icon: Icons.abc,
+                              title: s.menu0Title,
+                              subtitle: s.menu0Subtitle,
+                              color: Colors.teal,
+                              onTap: () => _showKanaTypeDialog(context),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildMenuButton(
+                              context,
+                              icon: Icons.text_fields,
+                              title: s.menu1Title,
+                              subtitle: s.menu1Subtitle,
+                              color: const Color(0xFF667eea),
+                              onTap: () => _showWordModeDialog(context),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildMenuButton(
+                              context,
+                              icon: Icons.article,
+                              title: s.menu2Title,
+                              subtitle: s.menu2Subtitle,
+                              color: const Color(0xFF764ba2),
+                              onTap: () => _showSentenceCategoryDialog(context),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildMenuButton(
+                              context,
+                              icon: Icons.quiz,
+                              title: s.menu3Title,
+                              subtitle: s.menu3Subtitle,
+                              color: const Color(0xFFe96743),
+                              onTap: () => _showQuizTypeDialog(context),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildMenuButton(
+                              context,
+                              icon: Icons.radio,
+                              title: s.menu4Title,
+                              subtitle: s.menu4Subtitle,
+                              color: const Color(0xFF43a047),
+                              onTap: () => _showRadioTypeDialog(context),
+                            ),
+                          ],
+                        );
+                      }),
                         ],
                         ),
                       ),
@@ -308,19 +314,20 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showKanaTypeDialog(BuildContext context) {
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
-        title: const Text('음절 유형 선택', style: TextStyle(color: Colors.white)),
+        title: Text(s.kanaSelectType, style: const TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildQuizTypeOption(
               ctx,
               icon: Icons.abc,
-              label: '히라가나 (ひらがな)',
-              description: '기본 일본어 음절 46자 + 탁음/반탁음',
+              label: s.kanaHiragana,
+              description: s.kanaHiraganaDesc,
               color: Colors.teal,
               onTap: () {
                 Navigator.pop(ctx);
@@ -331,8 +338,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.abc,
-              label: '가타카나 (カタカナ)',
-              description: '외래어 표기 음절 46자 + 탁음/반탁음',
+              label: s.kanaKatakana,
+              description: s.kanaKatakanaDesc,
               color: Colors.orange,
               onTap: () {
                 Navigator.pop(ctx);
@@ -343,8 +350,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.auto_awesome,
-              label: '함께 공부하기',
-              description: '같은 음절 별 히라가나+가타카나 나란히 써보기',
+              label: s.kanaBoth,
+              description: s.kanaBothDesc,
               color: Colors.deepPurple,
               onTap: () {
                 Navigator.pop(ctx);
@@ -359,13 +366,14 @@ class _HomeScreenState extends State<HomeScreen>
 
   void _showKanaBothModeDialog(BuildContext context) {
     const color = Colors.deepPurple;
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
-        title: const Text(
-          '히라가나 + 가타카나 학습 모드',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          'Hiragana + Katakana ${s.kanaModeTitle}',
+          style: const TextStyle(color: Colors.white),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -373,8 +381,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.edit,
-              label: '써보기',
-              description: '같은 음절 히라가나·가타카나 나란히 보며 써보기 (46음절)',
+              label: s.kanaModeWrite,
+              description: '${s.kanaBothDesc} (46)',
               color: color,
               onTap: () {
                 Navigator.pop(ctx);
@@ -385,8 +393,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.hearing,
-              label: '써보기 (발음만)',
-              description: '글자를 가리고 소리만 듣고 써보기',
+              label: s.kanaModeWriteBlind,
+              description: s.kanaModeWriteBlindDesc,
               color: color,
               onTap: () {
                 Navigator.pop(ctx);
@@ -402,14 +410,15 @@ class _HomeScreenState extends State<HomeScreen>
   void _showKanaModeDialog(BuildContext context, String kanaType) {
     final isHiragana = kanaType == 'hiragana';
     final color = isHiragana ? Colors.teal : Colors.orange;
-    final typeName = isHiragana ? '히라가나' : '가타카나';
+    final s = AppStrings.of(context);
+    final typeName = isHiragana ? s.kanaHiragana : s.kanaKatakana;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
         title: Text(
-          '$typeName 학습 모드',
+          '$typeName ${s.kanaModeTitle}',
           style: const TextStyle(color: Colors.white),
         ),
         content: Column(
@@ -418,8 +427,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.grid_view,
-              label: '공부하기',
-              description: '음절표를 보면서 발음 익히기',
+              label: s.kanaModeStudy,
+              description: s.kanaModeStudyDesc,
               color: color,
               onTap: () {
                 Navigator.pop(ctx);
@@ -435,8 +444,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.edit,
-              label: '써보기',
-              description: '청음 46자를 손가락으로 따라 써보기',
+              label: s.kanaModeWrite,
+              description: s.kanaModeWriteDesc,
               color: color,
               onTap: () {
                 Navigator.pop(ctx);
@@ -447,8 +456,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.hearing,
-              label: '써보기 (발음만)',
-              description: '글자를 가리고 소리만 듣고 써보기',
+              label: s.kanaModeWriteBlind,
+              description: s.kanaModeWriteBlindDesc,
               color: color,
               onTap: () {
                 Navigator.pop(ctx);
@@ -471,15 +480,18 @@ class _HomeScreenState extends State<HomeScreen>
     final color = isBoth
         ? Colors.deepPurple
         : (isHiragana ? Colors.teal : Colors.orange);
-    final typeName = isBoth ? '히라가나 + 가타카나' : (isHiragana ? '히라가나' : '가타카나');
-    final countLabel = isBoth ? '46음절 (히라가나+가타카나 함께)' : '청음 46자';
+    final s = AppStrings.of(context);
+    final typeName = isBoth
+        ? 'Hiragana + Katakana'
+        : (isHiragana ? s.kanaHiragana : s.kanaKatakana);
+    final countLabel = isBoth ? s.kanaBothCountLabel : s.kanaCountLabel;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
         title: Text(
-          blindMode ? '$typeName 써보기 (발음만)' : '$typeName 써보기',
+          blindMode ? '$typeName ${s.kanaModeWriteBlind}' : '$typeName ${s.kanaModeWrite}',
           style: const TextStyle(color: Colors.white),
         ),
         content: Column(
@@ -488,8 +500,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.format_list_numbered,
-              label: '순서대로 써보기',
-              description: '행 순서대로 $countLabel 연습',
+              label: s.kanaOrderSequential,
+              description: countLabel,
               color: color,
               onTap: () {
                 Navigator.pop(ctx);
@@ -508,8 +520,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.shuffle,
-              label: '랜덤으로 써보기',
-              description: '랜덤 순서로 $countLabel 연습',
+              label: s.kanaOrderRandom,
+              description: countLabel,
               color: color,
               onTap: () {
                 Navigator.pop(ctx);
@@ -532,19 +544,20 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showWordModeDialog(BuildContext context) {
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
-        title: const Text('1단계: 단어 외우기', style: TextStyle(color: Colors.white)),
+        title: Text(s.wordModeTitle, style: const TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildQuizTypeOption(
               ctx,
               icon: Icons.menu_book,
-              label: '단어 공부하기',
-              description: '단어 카드를 넘기며 암기',
+              label: s.wordModeStudy,
+              description: s.wordModeStudyDesc,
               color: const Color(0xFF667eea),
               onTap: () {
                 Navigator.pop(ctx);
@@ -555,8 +568,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.draw,
-              label: '단어 써보기',
-              description: 'ML Kit으로 필기 인식 (한자 포함)',
+              label: s.wordModeWrite,
+              description: s.wordModeWriteDesc,
               color: const Color(0xFF43a047),
               onTap: () {
                 Navigator.pop(ctx);
@@ -570,11 +583,12 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showWordLevelDialog(BuildContext context, {String mode = 'study'}) {
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
-        title: const Text('단어 레벨 선택', style: TextStyle(color: Colors.white)),
+        title: Text(s.wordLevelTitle, style: const TextStyle(color: Colors.white)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -582,8 +596,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.shuffle,
-                label: '전체 랜덤',
-                description: '모든 레벨에서 랜덤 20개',
+                label: s.levelRandom,
+                description: s.levelRandomDesc,
                 color: Colors.blueGrey,
                 onTap: () {
                   Navigator.pop(ctx);
@@ -601,8 +615,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_one,
-                label: 'N5 (초급)',
-                description: 'N5 레벨 단어 20개',
+                label: s.n5Label,
+                description: s.levelDesc('N5', s.n5Label),
                 color: const Color(0xFF43a047),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -620,8 +634,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_two,
-                label: 'N4 (중급)',
-                description: 'N4 레벨 단어 20개',
+                label: s.n4Label,
+                description: s.levelDesc('N4', s.n4Label),
                 color: const Color(0xFFf5a623),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -639,8 +653,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_3,
-                label: 'N3 (상급)',
-                description: 'N3 레벨 단어 20개',
+                label: s.n3Label,
+                description: s.levelDesc('N3', s.n3Label),
                 color: const Color(0xFFe96743),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -658,8 +672,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_4,
-                label: 'N2 (상상급)',
-                description: 'N2 레벨 단어 20개',
+                label: s.n2Label,
+                description: s.levelDesc('N2', s.n2Label),
                 color: const Color(0xFF5c6bc0),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -677,8 +691,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_5,
-                label: 'N1 (최상급)',
-                description: 'N1 레벨 단어 20개',
+                label: s.n1Label,
+                description: s.levelDesc('N1', s.n1Label),
                 color: const Color(0xFF9c27b0),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -700,11 +714,12 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showSentenceCategoryDialog(BuildContext context) {
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
-        title: const Text('문장 레벨 선택', style: TextStyle(color: Colors.white)),
+        title: Text(s.sentenceLevelTitle, style: const TextStyle(color: Colors.white)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -712,8 +727,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.shuffle,
-                label: '전체 랜덤',
-                description: '모든 레벨/카테고리에서 랜덤 20개',
+                label: s.levelRandom,
+                description: '${s.levelRandomDesc} (${s.sentenceLevelTitle})',
                 color: Colors.blueGrey,
                 onTap: () {
                   Navigator.pop(ctx);
@@ -729,8 +744,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_one,
-                label: 'N5 (초급)',
-                description: 'N5 레벨 문장 20개',
+                label: s.n5Label,
+                description: s.levelDesc('N5', s.n5Label),
                 color: const Color(0xFF43a047),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -741,8 +756,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_two,
-                label: 'N4 (중급)',
-                description: 'N4 레벨 문장 20개',
+                label: s.n4Label,
+                description: s.levelDesc('N4', s.n4Label),
                 color: const Color(0xFFf5a623),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -753,8 +768,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_3,
-                label: 'N3 (상급)',
-                description: 'N3 레벨 문장 20개',
+                label: s.n3Label,
+                description: s.levelDesc('N3', s.n3Label),
                 color: const Color(0xFFe96743),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -765,8 +780,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_4,
-                label: 'N2 (상상급)',
-                description: 'N2 레벨 문장 20개',
+                label: s.n2Label,
+                description: s.levelDesc('N2', s.n2Label),
                 color: const Color(0xFF5c6bc0),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -777,8 +792,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_5,
-                label: 'N1 (최상급)',
-                description: 'N1 레벨 문장 20개',
+                label: s.n1Label,
+                description: s.levelDesc('N1', s.n1Label),
                 color: const Color(0xFF9c27b0),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -793,6 +808,7 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showSentenceSubCategoryDialog(BuildContext context, String level) {
+    final s = AppStrings.of(context);
     final sentenceService = SentenceService();
     sentenceService.loadSentences().then((_) {
       final categories = sentenceService.getCategories();
@@ -803,7 +819,7 @@ class _HomeScreenState extends State<HomeScreen>
         builder: (ctx) => AlertDialog(
           backgroundColor: const Color(0xFF2a2a4e),
           title: Text(
-            '$level 문장 — 카테고리 선택',
+            '$level — ${s.sentenceCategoryAll}',
             style: const TextStyle(color: Colors.white),
           ),
           content: SingleChildScrollView(
@@ -813,8 +829,8 @@ class _HomeScreenState extends State<HomeScreen>
                 _buildQuizTypeOption(
                   ctx,
                   icon: Icons.shuffle,
-                  label: '전체 카테고리',
-                  description: '$level 레벨 전체에서 랜덤 20개',
+                  label: s.sentenceCategoryAll,
+                  description: s.sentenceCategoryAllDesc(level),
                   color: Colors.blueGrey,
                   onTap: () {
                     Navigator.pop(ctx);
@@ -833,7 +849,7 @@ class _HomeScreenState extends State<HomeScreen>
                       ctx,
                       icon: Icons.category,
                       label: cat,
-                      description: '$level / $cat 문장 학습',
+                      description: s.sentenceCategoryDesc(level, cat),
                       color: const Color(0xFF764ba2),
                       onTap: () {
                         Navigator.pop(ctx);
@@ -859,11 +875,12 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showQuizTypeDialog(BuildContext context) {
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
-        title: const Text('퀴즈 유형 선택', style: TextStyle(color: Colors.white)),
+        title: Text(s.quizSelectType, style: const TextStyle(color: Colors.white)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -871,8 +888,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.abc,
-                label: '히라가나 퀴즈',
-                description: '히라가나 → 한글 발음 맞추기',
+                label: s.quizHiragana,
+                description: s.quizHiraganaDesc,
                 color: Colors.teal,
                 onTap: () {
                   Navigator.pop(ctx);
@@ -889,8 +906,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.abc,
-                label: '가타카나 퀴즈',
-                description: '가타카나 → 한글 발음 맞추기',
+                label: s.quizKatakana,
+                description: s.quizKatakanaDesc,
                 color: Colors.orange,
                 onTap: () {
                   Navigator.pop(ctx);
@@ -907,8 +924,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.text_fields,
-                label: '단어 퀴즈',
-                description: '일본어 단어 → 한국어 뜻 맞추기',
+                label: s.quizWord,
+                description: s.quizWordDesc,
                 color: const Color(0xFF667eea),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -919,8 +936,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.article,
-                label: '문장 퀴즈',
-                description: '일본어 문장 → 한국어 해석 맞추기',
+                label: s.quizSentence,
+                description: s.quizSentenceDesc,
                 color: const Color(0xFF764ba2),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -935,13 +952,13 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showDifficultyDialog(BuildContext context, String quizType) {
-    final typeLabel = quizType == 'word' ? '단어' : '문장';
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
         title: Text(
-          '$typeLabel 퀴즈 — 난이도 선택',
+          s.quizDifficultyTitle(quizType),
           style: const TextStyle(color: Colors.white),
         ),
         content: SingleChildScrollView(
@@ -951,8 +968,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_5,
-                label: '최상 (N1)',
-                description: '최상급 단계 — N1 레벨 80%',
+                label: s.n1Label,
+                description: 'N1 — 80%',
                 color: const Color(0xFF9c27b0),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -969,8 +986,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_4,
-                label: '상상 (N2)',
-                description: '상상급 단계 — N2 레벨 80%',
+                label: s.n2Label,
+                description: 'N2 — 80%',
                 color: const Color(0xFF5c6bc0),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -987,8 +1004,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_3,
-                label: '상 (N3)',
-                description: '고급 단계 — N3 레벨 80%',
+                label: s.n3Label,
+                description: 'N3 — 80%',
                 color: const Color(0xFFe96743),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1005,8 +1022,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_two,
-                label: '중 (N4)',
-                description: '중급 단계 — N4 레벨 80%',
+                label: s.n4Label,
+                description: 'N4 — 80%',
                 color: const Color(0xFFf5a623),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1023,8 +1040,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_one,
-                label: '하 (N5)',
-                description: '초급 단계 — N5 레벨 80%',
+                label: s.n5Label,
+                description: 'N5 — 80%',
                 color: const Color(0xFF43a047),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1045,19 +1062,20 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showRadioTypeDialog(BuildContext context) {
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
-        title: const Text('라디오 모드 선택', style: TextStyle(color: Colors.white)),
+        title: Text(s.radioSelectMode, style: const TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildQuizTypeOption(
               ctx,
               icon: Icons.text_fields,
-              label: '단어 라디오',
-              description: '단어를 자동으로 반복 재생',
+              label: s.radioWord,
+              description: s.radioWordDesc,
               color: const Color(0xFF43a047),
               onTap: () {
                 Navigator.pop(ctx);
@@ -1068,8 +1086,8 @@ class _HomeScreenState extends State<HomeScreen>
             _buildQuizTypeOption(
               ctx,
               icon: Icons.article,
-              label: '문장 라디오',
-              description: '문장을 자동으로 반복 재생',
+              label: s.radioSentence,
+              description: s.radioSentenceDesc,
               color: const Color(0xFF43a047),
               onTap: () {
                 Navigator.pop(ctx);
@@ -1083,13 +1101,13 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showRadioLevelDialog(BuildContext context, String radioMode) {
-    final modeLabel = radioMode == 'word' ? '단어' : '문장';
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
         title: Text(
-          '$modeLabel 라디오 — 레벨 선택',
+          s.radioLevelTitle(radioMode),
           style: const TextStyle(color: Colors.white),
         ),
         content: SingleChildScrollView(
@@ -1099,8 +1117,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.shuffle,
-                label: '전체 랜덤',
-                description: '모든 레벨에서 랜덤 20개',
+                label: s.levelRandom,
+                description: s.levelRandomDesc,
                 color: Colors.blueGrey,
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1116,8 +1134,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_one,
-                label: 'N5 (초급)',
-                description: 'N5 레벨 $modeLabel 20개',
+                label: s.n5Label,
+                description: s.levelDesc('N5', s.n5Label),
                 color: const Color(0xFF43a047),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1133,8 +1151,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_two,
-                label: 'N4 (중급)',
-                description: 'N4 레벨 $modeLabel 20개',
+                label: s.n4Label,
+                description: s.levelDesc('N4', s.n4Label),
                 color: const Color(0xFFf5a623),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1150,8 +1168,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_3,
-                label: 'N3 (상급)',
-                description: 'N3 레벨 $modeLabel 20개',
+                label: s.n3Label,
+                description: s.levelDesc('N3', s.n3Label),
                 color: const Color(0xFFe96743),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1167,8 +1185,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_4,
-                label: 'N2 (상상급)',
-                description: 'N2 레벨 $modeLabel 20개',
+                label: s.n2Label,
+                description: s.levelDesc('N2', s.n2Label),
                 color: const Color(0xFF5c6bc0),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1184,8 +1202,8 @@ class _HomeScreenState extends State<HomeScreen>
               _buildQuizTypeOption(
                 ctx,
                 icon: Icons.looks_5,
-                label: 'N1 (최상급)',
-                description: 'N1 레벨 $modeLabel 20개',
+                label: s.n1Label,
+                description: s.levelDesc('N1', s.n1Label),
                 color: const Color(0xFF9c27b0),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -1258,7 +1276,8 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildDrawer(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final user = authProvider.user;
-    final displayName = user?.displayName ?? '학습자';
+    final s = AppStrings.of(context);
+    final displayName = user?.displayName ?? (s.appSubtitle == 'Japanese Learning' ? 'Learner' : '학습자');
     final email = user?.email ?? '';
 
     return Drawer(
@@ -1325,13 +1344,10 @@ class _HomeScreenState extends State<HomeScreen>
             // 메뉴 목록
             ListTile(
               leading: const Icon(Icons.assessment, color: Colors.purpleAccent),
-              title: const Text(
-                '레벨 테스트',
-                style: TextStyle(color: Colors.white),
-              ),
-              subtitle: const Text(
-                '내 JLPT 레벨 측정하기',
-                style: TextStyle(color: Colors.white38, fontSize: 12),
+              title: Text(s.drawerLevelTest, style: const TextStyle(color: Colors.white)),
+              subtitle: Text(
+                s.drawerLevelTestSub,
+                style: const TextStyle(color: Colors.white38, fontSize: 12),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -1343,7 +1359,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             ListTile(
               leading: const Icon(Icons.person, color: Colors.white70),
-              title: const Text('내 프로필', style: TextStyle(color: Colors.white)),
+              title: Text(s.drawerProfile, style: const TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -1354,7 +1370,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             ListTile(
               leading: const Icon(Icons.bar_chart, color: Colors.white70),
-              title: const Text('학습 통계', style: TextStyle(color: Colors.white)),
+              title: Text(s.drawerStats, style: const TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -1365,7 +1381,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             ListTile(
               leading: const Icon(Icons.leaderboard, color: Colors.white70),
-              title: const Text('랭킹', style: TextStyle(color: Colors.white)),
+              title: Text(s.drawerRanking, style: const TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -1376,7 +1392,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             ListTile(
               leading: const Icon(Icons.assignment_late, color: Colors.white70),
-              title: const Text('오답 노트', style: TextStyle(color: Colors.white)),
+              title: Text(s.drawerWrongNote, style: const TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -1387,10 +1403,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             ListTile(
               leading: const Icon(Icons.history, color: Colors.white70),
-              title: const Text(
-                '공부한 내역 확인하기',
-                style: TextStyle(color: Colors.white),
-              ),
+              title: Text(s.drawerHistory, style: const TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -1402,7 +1415,7 @@ class _HomeScreenState extends State<HomeScreen>
             const Divider(color: Colors.white12),
             ListTile(
               leading: const Icon(Icons.settings, color: Colors.white70),
-              title: const Text('설정', style: TextStyle(color: Colors.white)),
+              title: Text(s.drawerSettings, style: const TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -1415,10 +1428,7 @@ class _HomeScreenState extends State<HomeScreen>
             const Divider(color: Colors.white12),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.redAccent),
-              title: const Text(
-                '로그아웃',
-                style: TextStyle(color: Colors.redAccent),
-              ),
+              title: Text(s.drawerLogout, style: const TextStyle(color: Colors.redAccent)),
               onTap: () {
                 Navigator.pop(context);
                 _showLogoutDialog(context);
@@ -1438,29 +1448,24 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showLogoutDialog(BuildContext context) {
+    final s = AppStrings.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF2a2a4e),
-        title: const Text('로그아웃', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          '로그아웃 하시겠습니까?',
-          style: TextStyle(color: Colors.white70),
-        ),
+        title: Text(s.logoutTitle, style: const TextStyle(color: Colors.white)),
+        content: Text(s.logoutContent, style: const TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('취소'),
+            child: Text(s.logoutCancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
               context.read<AuthProvider>().signOut();
             },
-            child: const Text(
-              '로그아웃',
-              style: TextStyle(color: Colors.redAccent),
-            ),
+            child: Text(s.logoutConfirm, style: const TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),

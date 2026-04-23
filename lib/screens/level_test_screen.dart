@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_strings.dart';
 import '../providers/level_test_provider.dart';
 
 class LevelTestScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: const Text('레벨 테스트'),
+        title: Text(AppStrings.of(context).levelTestTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -60,9 +61,9 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
           }
 
           if (provider.currentQuestion == null) {
-            return const Center(
-              child: Text('문제를 준비하는 중...',
-                  style: TextStyle(color: Colors.white70)),
+            return Center(
+              child: Text(AppStrings.of(context).levelTestPreparing,
+                  style: const TextStyle(color: Colors.white70)),
             );
           }
 
@@ -101,7 +102,7 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  '현재 레벨: ${provider.currentLevel}',
+                  AppStrings.of(context).levelTestCurrentLevel(provider.currentLevel),
                   style: const TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -270,8 +271,8 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
                 ),
                 child: Text(
                   provider.currentIndex < provider.totalCount - 1
-                      ? '다음 문제'
-                      : '결과 보기',
+                      ? AppStrings.of(context).levelTestNext
+                      : AppStrings.of(context).levelTestResult,
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
@@ -283,6 +284,7 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
   }
 
   Widget _buildResultScreen(BuildContext context, LevelTestProvider provider) {
+    final s = AppStrings.of(context);
     final stats = provider.levelStats;
     final recommended = provider.recommendedLevel;
     final percentage = provider.totalCount > 0
@@ -298,8 +300,8 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
             children: [
               const Icon(Icons.school, color: Color(0xFFab47bc), size: 80),
               const SizedBox(height: 24),
-              const Text(
-                '레벨 테스트 완료!',
+              Text(
+                s.levelTestComplete,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -324,8 +326,8 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      '추천 레벨',
+                    Text(
+                      s.levelTestRecommended,
                       style: TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                     const SizedBox(height: 8),
@@ -343,7 +345,7 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
               const SizedBox(height: 16),
               // Overall score
               Text(
-                '총 정답률: $percentage% (${provider.correctCount}/${provider.totalCount})',
+                s.levelTestAccuracy(percentage, provider.correctCount, provider.totalCount),
                 style: const TextStyle(fontSize: 18, color: Colors.white70),
               ),
               const SizedBox(height: 24),
@@ -358,8 +360,8 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '레벨별 정답률',
+                    Text(
+                      s.levelTestLevelAccuracy,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -438,8 +440,7 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
               ElevatedButton.icon(
                 onPressed: () => provider.startLevelTest(),
                 icon: const Icon(Icons.refresh),
-                label: const Text('다시 테스트하기',
-                    style: TextStyle(fontSize: 16)),
+                label: Text(s.levelTestRetry, style: const TextStyle(fontSize: 16)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFab47bc),
                   foregroundColor: Colors.white,
@@ -453,9 +454,9 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  '홈으로 돌아가기',
-                  style: TextStyle(color: Colors.white54, fontSize: 16),
+                child: Text(
+                  s.levelTestHome,
+                  style: const TextStyle(color: Colors.white54, fontSize: 16),
                 ),
               ),
             ],

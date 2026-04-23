@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_strings.dart';
 import '../providers/history_provider.dart';
 import '../providers/tts_settings_provider.dart';
 import '../providers/theme_provider.dart';
@@ -58,7 +59,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: const Text('설정'),
+        title: Text(AppStrings.of(context).settingsTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -66,15 +67,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: Consumer<TtsSettingsProvider>(
         builder: (context, settings, _) {
           final themeProvider = context.watch<ThemeProvider>();
+          final s = AppStrings.of(context);
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              // 번역 언어
-              _buildSectionTitle('번역 언어'),
+              _buildSectionTitle(s.settingsLangSection),
               const SizedBox(height: 4),
-              const Text(
-                '단어/문장 의미 표시 언어 (영어 데이터 없으면 한국어로 표시)',
-                style: TextStyle(color: Colors.white54, fontSize: 14),
+              Text(
+                s.settingsLangDesc,
+                style: const TextStyle(color: Colors.white54, fontSize: 14),
               ),
               const SizedBox(height: 12),
               Row(

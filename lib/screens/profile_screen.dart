@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_strings.dart';
 import '../providers/auth_provider.dart';
 import '../providers/history_provider.dart';
 import '../providers/theme_provider.dart';
@@ -24,92 +25,32 @@ class _BadgeDef {
   });
 }
 
-final _badgeList = <_BadgeDef>[
-  // 스트릭
-  _BadgeDef(
-    emoji: '🔥', name: '첫 불꽃',    desc: '연속 1일 학습',
-    color: Colors.deepOrange,
-    check: (hp) => hp.currentStreak >= 1,
-  ),
-  _BadgeDef(
-    emoji: '🔥', name: '3일 연속',   desc: '3일 연속 학습',
-    color: Colors.orange,
-    check: (hp) => hp.currentStreak >= 3,
-  ),
-  _BadgeDef(
-    emoji: '🔥', name: '일주일 전사', desc: '7일 연속 학습',
-    color: Colors.red,
-    check: (hp) => hp.currentStreak >= 7,
-  ),
-  _BadgeDef(
-    emoji: '💜', name: '한 달 챔피언', desc: '30일 연속 학습',
-    color: Colors.purple,
-    check: (hp) => hp.currentStreak >= 30,
-  ),
-  // 학습
-  _BadgeDef(
-    emoji: '📖', name: '첫 발걸음',  desc: '학습 1회 완료',
-    color: Colors.blue,
-    check: (hp) => hp.totalStudySessions >= 1,
-  ),
-  _BadgeDef(
-    emoji: '📚', name: '단어 탐험가', desc: '단어 학습 10회',
-    color: const Color(0xFF667eea),
-    check: (hp) => hp.wordStudyCount >= 10,
-  ),
-  _BadgeDef(
-    emoji: '📝', name: '문장 탐구자', desc: '문장 학습 10회',
-    color: const Color(0xFF764ba2),
-    check: (hp) => hp.sentenceStudyCount >= 10,
-  ),
-  _BadgeDef(
-    emoji: '🎓', name: '학습 고수',  desc: '총 50세션 달성',
-    color: Colors.indigo,
-    check: (hp) => hp.totalStudySessions >= 50,
-  ),
-  // 퀴즈
-  _BadgeDef(
-    emoji: '🎯', name: '첫 퀴즈',    desc: '퀴즈 1회 도전',
-    color: const Color(0xFFe96743),
-    check: (hp) => hp.coreQuizCount >= 1,
-  ),
-  _BadgeDef(
-    emoji: '🎯', name: '퀴즈 달인',  desc: '퀴즈 20회 도전',
-    color: Colors.redAccent,
-    check: (hp) => hp.coreQuizCount >= 20,
-  ),
-  _BadgeDef(
-    emoji: '✨', name: '정확도 우수', desc: '정답률 80%+ (5회↑)',
-    color: const Color(0xFFf5a623),
-    check: (hp) => hp.overallQuizAccuracy >= 80 && hp.coreQuizCount >= 5,
-  ),
-  _BadgeDef(
-    emoji: '🏆', name: '퀴즈 마스터', desc: '정답률 90%+ (10회↑)',
-    color: const Color(0xFF43a047),
-    check: (hp) => hp.overallQuizAccuracy >= 90 && hp.coreQuizCount >= 10,
-  ),
-  // 누적 세션
-  _BadgeDef(
-    emoji: '⭐', name: '10회 달성',  desc: '총 10세션 완료',
-    color: Colors.amber,
-    check: (hp) => hp.totalStudySessions >= 10,
-  ),
-  _BadgeDef(
-    emoji: '🌟', name: '50회 달성',  desc: '총 50세션 완료',
-    color: Colors.orange,
-    check: (hp) => hp.totalStudySessions >= 50,
-  ),
-  _BadgeDef(
-    emoji: '👑', name: '100회 달성', desc: '총 100세션 완료',
-    color: Colors.yellow,
-    check: (hp) => hp.totalStudySessions >= 100,
-  ),
-  _BadgeDef(
-    emoji: '💎', name: '학습왕',     desc: '총 200세션 완료',
-    color: Colors.cyan,
-    check: (hp) => hp.totalStudySessions >= 200,
-  ),
-];
+List<_BadgeDef> _getBadgeList(AppStrings s) {
+  final names = s.profileBadgeNames;
+  final descs = s.profileBadgeDescs;
+  return [
+    // streak
+    _BadgeDef(emoji: '🔥', name: names[0],  desc: descs[0],  color: Colors.deepOrange,          check: (hp) => hp.currentStreak >= 1),
+    _BadgeDef(emoji: '🔥', name: names[1],  desc: descs[1],  color: Colors.orange,               check: (hp) => hp.currentStreak >= 3),
+    _BadgeDef(emoji: '🔥', name: names[2],  desc: descs[2],  color: Colors.red,                  check: (hp) => hp.currentStreak >= 7),
+    _BadgeDef(emoji: '💜', name: names[3],  desc: descs[3],  color: Colors.purple,               check: (hp) => hp.currentStreak >= 30),
+    // study
+    _BadgeDef(emoji: '📖', name: names[4],  desc: descs[4],  color: Colors.blue,                 check: (hp) => hp.totalStudySessions >= 1),
+    _BadgeDef(emoji: '📚', name: names[5],  desc: descs[5],  color: const Color(0xFF667eea),     check: (hp) => hp.wordStudyCount >= 10),
+    _BadgeDef(emoji: '📝', name: names[6],  desc: descs[6],  color: const Color(0xFF764ba2),     check: (hp) => hp.sentenceStudyCount >= 10),
+    _BadgeDef(emoji: '🎓', name: names[7],  desc: descs[7],  color: Colors.indigo,               check: (hp) => hp.totalStudySessions >= 50),
+    // quiz
+    _BadgeDef(emoji: '🎯', name: names[8],  desc: descs[8],  color: const Color(0xFFe96743),     check: (hp) => hp.coreQuizCount >= 1),
+    _BadgeDef(emoji: '🎯', name: names[9],  desc: descs[9],  color: Colors.redAccent,            check: (hp) => hp.coreQuizCount >= 20),
+    _BadgeDef(emoji: '✨', name: names[10], desc: descs[10], color: const Color(0xFFf5a623),     check: (hp) => hp.overallQuizAccuracy >= 80 && hp.coreQuizCount >= 5),
+    _BadgeDef(emoji: '🏆', name: names[11], desc: descs[11], color: const Color(0xFF43a047),     check: (hp) => hp.overallQuizAccuracy >= 90 && hp.coreQuizCount >= 10),
+    // sessions
+    _BadgeDef(emoji: '⭐', name: names[12], desc: descs[12], color: Colors.amber,                check: (hp) => hp.totalStudySessions >= 10),
+    _BadgeDef(emoji: '🌟', name: names[13], desc: descs[13], color: Colors.orange,               check: (hp) => hp.totalStudySessions >= 50),
+    _BadgeDef(emoji: '👑', name: names[14], desc: descs[14], color: Colors.yellow,               check: (hp) => hp.totalStudySessions >= 100),
+    _BadgeDef(emoji: '💎', name: names[15], desc: descs[15], color: Colors.cyan,                 check: (hp) => hp.totalStudySessions >= 200),
+  ];
+}
 
 // ─────────────────────────────────────────────
 // ProfileScreen
@@ -120,6 +61,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppStrings.of(context);
     final authProvider = context.watch<AuthProvider>();
     final historyProvider = context.watch<HistoryProvider>();
     final themeGradient = context.watch<ThemeProvider>().gradient;
@@ -128,7 +70,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF1a1a2e),
       appBar: AppBar(
-        title: const Text('내 프로필'),
+        title: Text(s.profileTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -137,15 +79,15 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            _buildUserHeader(user, themeGradient),
+            _buildUserHeader(s, user, themeGradient),
             const SizedBox(height: 24),
-            _buildStudySummary(historyProvider),
+            _buildStudySummary(context, s, historyProvider),
             const SizedBox(height: 24),
-            _buildBadgesSection(historyProvider),
+            _buildBadgesSection(s, historyProvider),
             const SizedBox(height: 24),
-            _buildCalendarSection(historyProvider),
+            _buildCalendarSection(s, historyProvider),
             const SizedBox(height: 24),
-            _buildQuizStatsSection(historyProvider),
+            _buildQuizStatsSection(s, historyProvider),
           ],
         ),
       ),
@@ -154,7 +96,7 @@ class ProfileScreen extends StatelessWidget {
 
   // ── 유저 헤더 ──────────────────────────────
 
-  Widget _buildUserHeader(dynamic user, LinearGradient gradient) {
+  Widget _buildUserHeader(AppStrings s, dynamic user, LinearGradient gradient) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -180,7 +122,7 @@ class ProfileScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.displayName ?? '학습자',
+                  user?.displayName ?? s.profileLearner,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -205,7 +147,10 @@ class ProfileScreen extends StatelessWidget {
 
   // ── 학습 요약 ──────────────────────────────
 
-  Widget _buildStudySummary(HistoryProvider provider) {
+  Widget _buildStudySummary(BuildContext context, AppStrings s, HistoryProvider provider) {
+    final t = s.profileTimesUnit;
+    final d = s.profileDaysUnit;
+    final i = s.profileItemsUnit;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -216,9 +161,9 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '학습 요약',
-            style: TextStyle(
+          Text(
+            s.profileSummary,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -230,8 +175,8 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildSummaryTile(
                   icon: Icons.today,
-                  label: '오늘 학습',
-                  value: '${provider.todayStudyCount}회',
+                  label: s.profileTodayStudy,
+                  value: '${provider.todayStudyCount}$t',
                   color: const Color(0xFF667eea),
                 ),
               ),
@@ -239,8 +184,8 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildSummaryTile(
                   icon: Icons.library_books,
-                  label: '누적 학습',
-                  value: '${provider.coreStudyCount}회',
+                  label: s.profileTotalStudy,
+                  value: '${provider.coreStudyCount}$t',
                   color: const Color(0xFF764ba2),
                 ),
               ),
@@ -252,8 +197,8 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildSummaryTile(
                   icon: Icons.quiz,
-                  label: '오늘 퀴즈',
-                  value: '${provider.todayQuizCount}회',
+                  label: s.profileTodayQuiz,
+                  value: '${provider.todayQuizCount}$t',
                   color: const Color(0xFFe96743),
                 ),
               ),
@@ -261,8 +206,8 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildSummaryTile(
                   icon: Icons.assignment,
-                  label: '누적 퀴즈',
-                  value: '${provider.coreQuizCount}회',
+                  label: s.profileTotalQuiz,
+                  value: '${provider.coreQuizCount}$t',
                   color: const Color(0xFFf5a623),
                 ),
               ),
@@ -274,7 +219,7 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildSummaryTile(
                   icon: Icons.percent,
-                  label: '퀴즈 정답률',
+                  label: s.profileAccuracy,
                   value: '${provider.overallQuizAccuracy.toStringAsFixed(1)}%',
                   color: const Color(0xFF43a047),
                 ),
@@ -283,8 +228,8 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildSummaryTile(
                   icon: Icons.local_fire_department,
-                  label: '연속 학습',
-                  value: '${provider.currentStreak}일',
+                  label: s.profileStreak,
+                  value: '${provider.currentStreak}$d',
                   color: Colors.deepOrange,
                 ),
               ),
@@ -296,8 +241,8 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildSummaryTile(
                   icon: Icons.assignment_late,
-                  label: '오답 노트',
-                  value: '${provider.wrongAnswerCount}개',
+                  label: s.profileWrongNote,
+                  value: '${provider.wrongAnswerCount}$i',
                   color: Colors.redAccent,
                 ),
               ),
@@ -305,8 +250,8 @@ class ProfileScreen extends StatelessWidget {
               Expanded(
                 child: _buildSummaryTile(
                   icon: Icons.auto_stories,
-                  label: '총 세션',
-                  value: '${provider.totalStudySessions}회',
+                  label: s.profileTotalSessions,
+                  value: '${provider.totalStudySessions}$t',
                   color: Colors.blueGrey,
                 ),
               ),
@@ -364,8 +309,9 @@ class ProfileScreen extends StatelessWidget {
 
   // ── 배지 섹션 ──────────────────────────────
 
-  Widget _buildBadgesSection(HistoryProvider hp) {
-    final earnedCount = _badgeList.where((b) => b.check(hp)).length;
+  Widget _buildBadgesSection(AppStrings s, HistoryProvider hp) {
+    final badges = _getBadgeList(s);
+    final earnedCount = badges.where((b) => b.check(hp)).length;
 
     return Container(
       width: double.infinity,
@@ -380,16 +326,16 @@ class ProfileScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '획득한 배지',
-                style: TextStyle(
+              Text(
+                s.profileBadges,
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
               Text(
-                '$earnedCount / ${_badgeList.length}',
+                '$earnedCount / ${badges.length}',
                 style: const TextStyle(fontSize: 14, color: Colors.white54),
               ),
             ],
@@ -402,7 +348,7 @@ class ProfileScreen extends StatelessWidget {
             childAspectRatio: 0.82,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            children: _badgeList.map((badge) {
+            children: badges.map((badge) {
               final earned = badge.check(hp);
               return _buildBadgeItem(badge, earned);
             }).toList(),
@@ -471,7 +417,7 @@ class ProfileScreen extends StatelessWidget {
 
   // ── 학습 활동 캘린더 ────────────────────────
 
-  Widget _buildCalendarSection(HistoryProvider provider) {
+  Widget _buildCalendarSection(AppStrings s, HistoryProvider provider) {
     final activity = provider.studyActivityByDate;
     final now = DateTime.now();
 
@@ -485,9 +431,9 @@ class ProfileScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '학습 활동 (30일 전 ~ 10일 후)',
-            style: TextStyle(
+          Text(
+            s.profileActivityChart,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -496,11 +442,11 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              _buildLegend(Colors.blue, '단어'),
+              _buildLegend(Colors.blue, s.profileWord),
               const SizedBox(width: 16),
-              _buildLegend(Colors.purple, '문장'),
+              _buildLegend(Colors.purple, s.profileSentence),
               const SizedBox(width: 16),
-              _buildLegend(Colors.orange, '퀴즈'),
+              _buildLegend(Colors.orange, s.profileQuiz),
             ],
           ),
           const SizedBox(height: 16),
@@ -525,7 +471,7 @@ class ProfileScreen extends StatelessWidget {
               return Tooltip(
                 message: isFuture
                     ? '${date.month}/${date.day}'
-                    : '${date.month}/${date.day} — ${types.isEmpty ? "활동 없음" : "${types.length}건"}',
+                    : '${date.month}/${date.day} — ${types.isEmpty ? s.profileNoActivity : "${types.length}${s.profileItemsUnit}"}',
                 child: Container(
                   width: 32,
                   height: 32,
@@ -624,15 +570,15 @@ class ProfileScreen extends StatelessWidget {
 
   // ── 난이도별 퀴즈 통계 ──────────────────────
 
-  Widget _buildQuizStatsSection(HistoryProvider provider) {
+  Widget _buildQuizStatsSection(AppStrings s, HistoryProvider provider) {
     final stats = provider.quizStatsByDifficulty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '난이도별 퀴즈 통계',
-          style: TextStyle(
+        Text(
+          s.profileQuizStats,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -641,19 +587,19 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(child: _buildStatCard('N1 (최상)', stats['N1']!, const Color(0xFF9c27b0))),
+            Expanded(child: _buildStatCard(s, s.n1Label, stats['N1']!, const Color(0xFF9c27b0))),
             const SizedBox(width: 8),
-            Expanded(child: _buildStatCard('N2 (상상)', stats['N2']!, const Color(0xFF5c6bc0))),
+            Expanded(child: _buildStatCard(s, s.n2Label, stats['N2']!, const Color(0xFF5c6bc0))),
             const SizedBox(width: 8),
-            Expanded(child: _buildStatCard('N3 (상)',   stats['N3']!, const Color(0xFFe96743))),
+            Expanded(child: _buildStatCard(s, s.n3Label, stats['N3']!, const Color(0xFFe96743))),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            Expanded(child: _buildStatCard('N4 (중)', stats['N4']!, const Color(0xFFf5a623))),
+            Expanded(child: _buildStatCard(s, s.n4Label, stats['N4']!, const Color(0xFFf5a623))),
             const SizedBox(width: 8),
-            Expanded(child: _buildStatCard('N5 (하)', stats['N5']!, const Color(0xFF43a047))),
+            Expanded(child: _buildStatCard(s, s.n5Label, stats['N5']!, const Color(0xFF43a047))),
             const SizedBox(width: 8),
             const Expanded(child: SizedBox()),
           ],
@@ -662,7 +608,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String label, Map<String, dynamic> data, Color color) {
+  Widget _buildStatCard(AppStrings s, String label, Map<String, dynamic> data, Color color) {
     final quizCount = data['quizCount'] as int;
     final avgRate = data['avgRate'] as double;
 
@@ -685,7 +631,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '$quizCount회',
+            '$quizCount${s.profileTimesUnit}',
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -702,7 +648,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            '평균 정답률',
+            s.profileAvgAccuracy,
             style: TextStyle(
               fontSize: 11,
               color: Colors.white.withValues(alpha: 0.4),

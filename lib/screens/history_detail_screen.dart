@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_strings.dart';
 import '../models/study_record.dart';
 import 'word_study_screen.dart';
 import 'sentence_study_screen.dart';
@@ -54,9 +55,10 @@ class HistoryDetailScreen extends StatelessWidget {
                 if (isQuiz && record.correctCount != null) ...[
                   const SizedBox(height: 8),
                   Text(
-                    '정답률: ${(record.correctCount! / record.totalCount * 100).round()}%',
-                    style:
-                        const TextStyle(fontSize: 16, color: Colors.white70),
+                    AppStrings.of(context).historyDetailAccuracy(
+                      (record.correctCount! / record.totalCount * 100).round(),
+                    ),
+                    style: const TextStyle(fontSize: 16, color: Colors.white70),
                   ),
                 ],
               ],
@@ -67,8 +69,8 @@ class HistoryDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                const Text(
-                  '학습 내용',
+                Text(
+                  AppStrings.of(context).historyDetailTitle,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -105,8 +107,8 @@ class HistoryDetailScreen extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: () => _navigateToRestudy(context),
                   icon: const Icon(Icons.replay),
-                  label: const Text('다시 공부하기',
-                      style: TextStyle(fontSize: 17)),
+                  label: Text(AppStrings.of(context).historyDetailStudyAgain,
+                      style: const TextStyle(fontSize: 17)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _getTypeColor(record.type),
                     foregroundColor: Colors.white,

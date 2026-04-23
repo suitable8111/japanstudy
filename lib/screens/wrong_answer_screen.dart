@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_strings.dart';
 import '../models/study_record.dart';
 import '../providers/history_provider.dart';
 import '../providers/quiz_provider.dart';
@@ -15,18 +16,18 @@ class WrongAnswerScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: const Color(0xFF1a1a2e),
         appBar: AppBar(
-          title: const Text('오답 노트'),
+          title: Text(AppStrings.of(context).wrongTitle),
           backgroundColor: Colors.transparent,
           elevation: 0,
           foregroundColor: Colors.white,
-          bottom: const TabBar(
-            indicatorColor: Color(0xFFe96743),
+          bottom: TabBar(
+            indicatorColor: const Color(0xFFe96743),
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white54,
             tabs: [
-              Tab(text: '전체'),
-              Tab(text: '단어'),
-              Tab(text: '문장'),
+              Tab(text: AppStrings.of(context).wrongAll),
+              Tab(text: AppStrings.of(context).wrongWord),
+              Tab(text: AppStrings.of(context).wrongSentence),
             ],
           ),
         ),
@@ -59,21 +60,16 @@ class _WrongAnswerTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return const Center(
+      final s = AppStrings.of(context);
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.check_circle_outline, size: 64, color: Colors.white24),
-            SizedBox(height: 16),
-            Text(
-              '오답이 없습니다!',
-              style: TextStyle(fontSize: 18, color: Colors.white54),
-            ),
-            SizedBox(height: 8),
-            Text(
-              '퀴즈를 풀면 틀린 문제가 여기에 표시됩니다',
-              style: TextStyle(fontSize: 14, color: Colors.white30),
-            ),
+            const Icon(Icons.check_circle_outline, size: 64, color: Colors.white24),
+            const SizedBox(height: 16),
+            Text(s.wrongEmpty, style: const TextStyle(fontSize: 18, color: Colors.white54)),
+            const SizedBox(height: 8),
+            Text(s.wrongEmptyDesc, style: const TextStyle(fontSize: 14, color: Colors.white30)),
           ],
         ),
       );
@@ -99,7 +95,7 @@ class _WrongAnswerTab extends StatelessWidget {
                       color: Colors.orangeAccent, size: 24),
                   const SizedBox(width: 8),
                   Text(
-                    '총 ${items.length}개의 오답',
+                    AppStrings.of(context).wrongCount(items.length),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -130,8 +126,7 @@ class _WrongAnswerTab extends StatelessWidget {
             onPressed: () => _startWrongAnswerQuiz(context),
             backgroundColor: const Color(0xFFe96743),
             icon: const Icon(Icons.refresh, color: Colors.white),
-            label:
-                const Text('오답 재도전', style: TextStyle(color: Colors.white)),
+            label: Text(AppStrings.of(context).wrongRetry, style: const TextStyle(color: Colors.white)),
           ),
         ),
       ],
